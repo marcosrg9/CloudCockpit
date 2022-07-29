@@ -1,0 +1,24 @@
+.cont {
+	height: calc(100vh - 68px - 20px);
+}
+
+.toolbar,
+.toolbar > div {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.toolbar > div > .icon {
+	padding: 5px;
+	margin-right: 10px;
+	cursor: pointer;
+}
+
+.toolbar > div > :last-child {
+	margin-right: 0px;
+}
+
+.term_cont {
+	height: 100%;
+}

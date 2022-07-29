@@ -1,0 +1,14 @@
+<div class="cont">
+  <div class="toolbar">
+    <h2>CloudCockpit</h2>
+    <div>
+      <div (click)="print()" class="icon">console</div>
+      <div (click)="magnify()" class="icon">add</div>
+      <div (click)="minify()" class="icon">delete</div>
+      <div (click)="sockets.kill()" class="icon">trash</div>
+    </div>
+  </div>
+  <div class="term_cont">
+    <ng-terminal #term></ng-terminal>
+  </div>
+</div>

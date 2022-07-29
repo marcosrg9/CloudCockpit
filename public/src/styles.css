@@ -1,0 +1,62 @@
+body {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	padding: 10px 20px;
+	background: #262a33;
+	color: white;
+	height: 100vh - 67px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.icon {
+	font-family: 'UIKit Icons';
+}
+
+ng-terminal {
+	/* font-family: 'MesloLGS NF' !important; */
+}
+
+ng-terminal > * > .resize-handle {
+	opacity: 0 !important;
+}
+
+/* @font-face {
+	font-family: 'MesloLGS NF';
+	src: url('./assets/fonts/MesloLGS-NF-Regular.woff2') format('woff2'),
+		 url('./assets/fonts/MesloLGS-NF_Regular.ttf');
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+} */
+
+@font-face {
+font-family: "MesloLGS NF";
+src: url("https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf");
+font-weight: normal;
+font-style: normal;
+}
+@font-face {
+	font-family: "MesloLGS NF";
+	src: url("https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold.ttf");
+	font-weight: bold;
+	font-style: normal;
+}
+@font-face {
+	font-family: "MesloLGS NF";
+	src: url("https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Italic.ttf");
+	font-weight: normal;
+	font-style: italic;
+}
+@font-face {
+	font-family: "MesloLGS NF";
+	src: url("https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold%20Italic.ttf");
+	font-weight: bold;
+	font-style: italic;
+}
+@font-face {
+	font-family: "UIKit Icons";
+	src: url("./assets/fonts/UIKitIcons-Rounded-7.ttf");
+	font-weight: normal;
+	-webkit-font-smoothing: antialiased;
+}
