@@ -1,0 +1,21 @@
+{
+  "name": "cloudcockpit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^18.6.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "node-pty": "^0.10.1",
+    "socket.io": "^4.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "ts-node main.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
