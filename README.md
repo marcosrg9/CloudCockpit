@@ -1,5 +1,5 @@
 <div align="center">
-	<img src="./.src/readme_banner.png">
+	<img src="https://raw.githubusercontent.com/marcosrg9/CloudCockpit/a2b1582d89235dd5aea955ef71d9b0efc6b5b2f2/.src/readme_banner.png">
 
 # CloudCockpit
 </div>
