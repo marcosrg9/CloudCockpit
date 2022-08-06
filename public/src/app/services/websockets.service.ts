@@ -5,18 +5,25 @@ import { Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class WebsocketsService {
+export class WebsocketsService extends Socket {
 
-  private socket: Socket = new Socket({ url: '192.168.1.3:3000' })
   public $stream: Subject<string> = new Subject();
 
   constructor() {
 
-    this.socket.on('connect', () => {
+    super({ url: '192.168.1.3:3000' })
+
+    this.on('connect', () => {
       console.log('Conectado al terminal remoto');
+
+      /* setTimeout(() => {
+        this.socket.emit('openTerminal', (data: any) => {
+          console.log(data);
+        });
+      }, 1000) */
     })
 
-    this.socket.on('data', (data: string) => {
+    /* this.socket.on('data', (data: string) => {
       this.$stream.next(data);
     })
 
@@ -24,20 +31,16 @@ export class WebsocketsService {
       console.log(data)
     })
 
-    this.socket.connect()
+    this.socket.connect() */
 
   }
 
-  public write(data: string) {
-    this.socket.emit('write', data);
-  }
-
-  public resize(data: {cols: number, rows: number}) {
+  /* public resize(data: {cols: number, rows: number}) {
     this.socket.emit('resize', data);
   }
 
   public kill() {
     console.log('Matando proceso');
     this.socket.emit('kill')
-  }
+  } */
 }

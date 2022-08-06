@@ -1,0 +1,18 @@
+.cont {
+	height: calc(100% - 68px);
+}
+
+.notifs {
+	position: absolute;
+	right: 0;
+}
+
+#terminalControl {
+	width: 100%;
+	padding-top: 10px;
+	padding-left: 10px;
+}
+
+.servers > .card {
+	padding: 12px;
+}

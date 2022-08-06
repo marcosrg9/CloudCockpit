@@ -1,0 +1,30 @@
+.actions, .apps {
+	display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-gap: 10px;
+}
+
+.actions > div > .Box,
+.apps > div > .Box {
+	width: 100%;
+}
+
+@media (max-width: 375px) {
+	.title {
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	.title > .octicon {
+		margin-right: 0px !important;
+	}
+
+	.title > .BtnGroup {
+		margin-top: 6px;
+		width: 100%;
+	}
+
+	.title > .BtnGroup > .BtnGroup-item {
+		width: 100%;
+	}
+}

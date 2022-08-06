@@ -1,0 +1,87 @@
+<div class="cont anim-fade-in">
+	<!-- <div class="Header" data-color-mode="dark" data-dark-theme="dark"> -->
+	<div class="Header color-bg-inset color-fg-default">
+
+		<div class="Header-item pointer" [routerLink]="['main']">
+			<h2>CloudCockpit</h2>
+		</div>
+		
+		<div class="Header-item Header-item--full"></div>
+		
+		<!-- <div class="Header-item">
+			<div class="pl-2">
+				<details class="dropdown details-reset details-overlay d-inline-block">
+				<summary class="color-fg-muted d-inline" aria-haspopup="true">
+					<svg class="octicon octicon-clippy mr-1" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0114.25 15H1.75A1.75 1.75 0 010 13.25V2.75zm1.75-.25a.25.25 0 00-.25.25V4.5h2v-2H1.75zM5 2.5v2h2v-2H5zm3.5 0v2h6V2.75a.25.25 0 00-.25-.25H8.5zm6 3.5h-13v7.25c0 .138.112.25.25.25h12.5a.25.25 0 00.25-.25V6z"></path></svg>
+					<span *ngIf="ptys.ptys.size > 0" class="Counter mr-1">{{ ptys.ptys.size }}</span>
+					<div class="dropdown-caret"></div>
+				</summary>
+			
+				<ul class="dropdown-menu dropdown-menu-sw">
+					<li><a class="dropdown-item" (click)="newTerm()">Nueva terminal</a></li>
+					<li *ngIf="ptys.focus" (click)="ptys.clear()"><a class="dropdown-item">Matar terminal</a></li>
+					<li><a class="dropdown-item" href="#url">Configuración</a></li>
+				</ul>
+			</details>
+			</div>
+		</div> -->
+		
+		<div class="Header-item">
+			<div class="pl-2">
+				<details class="dropdown details-reset details-overlay d-inline-block">
+				<summary class="d-inline avatar p-2 border-0" aria-haspopup="true">
+					<!-- <svg class="octicon octicon-clippy mr-1" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"></path></svg> -->
+					<span style="font-weight: 600">{{ auth.user.name.slice(0, 1) }}</span>
+					<!-- <div class="dropdown-caret ml-1"></div> -->
+				</summary>
+			
+				<ul class="dropdown-menu dropdown-menu-sw">
+					<li><a class="dropdown-item">Configuración</a></li>
+					<li (click)="auth.logout()"><a class="dropdown-item">Cerrar sesión</a></li>
+				</ul>
+				</details>
+			</div>
+		</div>
+
+		<!-- <div class="Header-item">
+			<div class="p-2">
+				<svg class="octicon octicon-clippy" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"></path></svg>
+				<div class="dropdown-caret"></div>
+			</div>
+		</div> -->
+
+	</div>
+
+	<!-- <div class="Header color-bg-inset border-top border-bottom">
+		<div class="Header-item">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.75 4.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"></path></svg>
+		</div>
+	</div> -->
+
+	<div class="notifs">
+		<div class="p-1" *ngIf="status.sync">
+			<div class="Toast Toast--loading Toast--animateIn">
+			  <span class="Toast-icon"><svg class="Toast--spinner" viewBox="0 0 32 32" width="18" height="18"><path fill="#959da5" d="M16 0 A16 16 0 0 0 16 32 A16 16 0 0 0 16 0 M16 4 A12 12 0 0 1 16 28 A12 12 0 0 1 16 4" /><path fill="#ffffff" d="M16 0 A16 16 0 0 1 32 16 L28 16 A12 12 0 0 0 16 4z"></path></svg></span>
+			  <span class="Toast-content">Sincronizando con el servidor.</span>
+			</div>
+		  </div>
+	</div>
+
+	<!-- <div #termCont id="terminalControl"></div> -->
+	 
+	<router-outlet></router-outlet>
+	<!-- <app-terminal></app-terminal> -->
+	<!-- <div *ngIf="ptys.ptys.size === 0" class="d-flex flex-column flex-justify-center flex-content-center" style="height: 100%;">
+		<div class="blankslate blankslate-narrow">
+			<svg class="octicon octicon-clippy mb-3" viewBox="0 0 24 24" width="42" height="42"><path d="M9.25 12a.75.75 0 01-.22.53l-2.75 2.75a.75.75 0 01-1.06-1.06L7.44 12 5.22 9.78a.75.75 0 111.06-1.06l2.75 2.75c.141.14.22.331.22.53zm2 2a.75.75 0 000 1.5h5a.75.75 0 000-1.5h-5z"></path><path fill-rule="evenodd" d="M0 4.75C0 3.784.784 3 1.75 3h20.5c.966 0 1.75.784 1.75 1.75v14.5A1.75 1.75 0 0122.25 21H1.75A1.75 1.75 0 010 19.25V4.75zm1.75-.25a.25.25 0 00-.25.25v14.5c0 .138.112.25.25.25h20.5a.25.25 0 00.25-.25V4.75a.25.25 0 00-.25-.25H1.75z"></path></svg>
+			<h3 class="blankslate-heading">No hay terminales activas.</h3>
+			<p>Abre una nueva terminal para comenzar a interactuar con el sistema del servidor.</p>
+			<div class="blankslate-action">
+			  <button (click)="newTerm()" class="btn btn-outline" type="button">Abrir terminal</button>
+			</div>
+			<div class="blankslate-action">
+				<button (click)="status.sync = !status.sync" class="btn-link" type="button">Sincronizar con el servidor</button>
+			</div>
+		</div>
+	</div> -->
+</div>

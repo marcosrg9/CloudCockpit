@@ -1,0 +1,39 @@
+.cont {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100vh;
+	flex-direction: row;
+	overflow-y: hidden;
+}
+
+.cont > :first-child {
+	margin-right: 60px;
+}
+
+.form {
+	width: 250px;
+	padding-right: 0px !important;
+}
+
+@media (max-width: 768px) {
+	.cont {
+		flex-direction: column;
+	}
+	.cont > :first-child {
+		margin-right: 0pt;
+	}
+	.form {
+		padding-right: 40px !important;
+	}
+}
+
+@media (max-width: 425px) {
+	.cont {
+		flex-direction: column;
+	}
+	.form {
+		width: 100%;
+	}
+}

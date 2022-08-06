@@ -1,0 +1,130 @@
+body {
+	/* background: #262a33;
+	color: white; */
+}
+
+.term-tabs {
+	display: flex;
+	align-items: center;
+	overflow: scroll;
+}
+
+.SelectMenu-tabs {
+	width: 100%;
+}
+
+.SelectMenu-tabs > .tab {
+	display: flex;
+	width: fit-content;
+	align-items: center;
+	padding: 10px 18px !important;
+	border-end-end-radius: 0px !important;
+	border-bottom-left-radius: 0px !important;
+	white-space: nowrap;
+}
+
+.SelectMenu-tabs > .octicon.metal {
+	/* fill: red; */
+}
+
+.tab > .consoleIcon,
+.tab:hover > .killBtn {
+	display: initial;
+	/* transition: ease 0.2s all; */
+}
+
+.tab > .killBtn,
+.tab:hover > .consoleIcon {
+	display: none;
+	/* transition: ease 0.2s all; */
+}
+
+.tab.focus {
+	/* background: var(--color-checks-gate-bg); */
+	/* background: var(--color-canvas-default) !important; */
+	background: var(--color-canvas-default) !important;
+	/* color: white; */
+	border: 1px solid var(--color-border-muted);
+	border-bottom-color: transparent !important;
+}
+
+.tab:hover:not(.focus) {
+	background: var(--color-accent-subtle) !important;
+	/* color: white; */
+}
+
+.actionBar {
+	/* background: var(--color-canvas-default) !important;
+	border-bottom: 1px solid var(--color-border-muted); */
+}
+
+.terminal-cont {
+	padding: 20px;
+	height: calc(100vh - 68px - 48px );
+	overflow: hidden;
+	position: relative;
+	background: var(--color-canvas-default);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+.terminal-cont > div {
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+}
+
+.terminal-cont > .focus {
+	opacity: 1;
+	pointer-events: all;
+	transition: 100ms linear opacity;
+}
+
+.terminal-cont >>> .xterm >>> .xterm-viewport {
+	background: var(--color-canvas-default) !important;
+}
+
+.terminal-outer {
+	padding: 0px !important;
+}
+
+.resize-handle {
+	background: transparent !important;
+}
+
+@media (max-width: 544px) {
+	.SelectMenu-tabs > :first-child {
+		/* border-top-left-radius: 0px !important; */
+		margin-left: 10px;
+	}
+	
+	.SelectMenu-tabs > :last-child {
+		/* border-top-right-radius: 0px !important; */
+		margin-right: 10px;
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	.terminal-cont {
+		background: white !important;
+		/* filter: invert(1); */
+	}
+
+	.tab.focus {
+		/* background: var(--color-checks-gate-bg); */
+		/* background: white !important;
+		color: black; */
+	}
+
+	.terminal-cont >>> .xterm >>> .xterm-viewport {
+		background-color: white !important;
+	}
+
+	.terminal-cont >>> .xterm >>> .xterm-screen >>> .xterm-rows {
+		color: black !important;
+	}
+}

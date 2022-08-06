@@ -1,0 +1,89 @@
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { pty, PtysService } from 'src/app/services/ptys.service';
+import { Terminal } from 'src/app/models/terminal.model';
+import { Subject } from 'rxjs';
+import { ServersService } from 'src/app/services/servers.service';
+
+
+import { SeqParser } from '../../../models/sequenceParser.model'
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-terms',
+  templateUrl: './terms.component.html',
+  styleUrls: ['./terms.component.css', './xterm.theme.css'],
+})
+export class TermsComponent implements AfterViewInit, OnDestroy, OnInit {
+
+  @HostListener('document:keydown', ['$event'])
+  keyDown(ev: KeyboardEvent) {
+    console.log(ev);
+    this.ptys.write(SeqParser.parse(ev));
+  }
+
+  @ViewChild('terminal') terminal: ElementRef<HTMLDivElement>;
+
+  public tabs = new Array(10);
+  public focusTab: pty;
+  
+  constructor(public ptys: PtysService,
+              public servers: ServersService,
+              public router: Router) {
+
+    if (!this.ptys.pending && this.ptys.ptys.length < 1) router.navigate(['/main'])
+  }
+
+  ngAfterViewInit(): void {
+
+
+    /* window.onresize = () => {
+      this.ptys.resize(this.terminal.nativeElement);
+    } */
+
+    this.createTerminal();
+
+  }
+
+  public createTerminal() {
+
+    if (this.ptys.waitForCreate && typeof this.ptys.waitForCreate === 'number') {
+      this.ptys.terminal.fitAddon.fit();
+  
+      setTimeout(() => {
+        //@ts-ignore
+        this.ptys.createTerminal(this.ptys.waitForCreate);
+        this.ptys.waitForCreate = null;
+      }, 100)
+    }
+    
+  }
+
+  public focus(server: number, pid: number) {
+
+    if (this.ptys.focusTerminal) {
+      const { server: fS, pid: fP } = this.ptys.focusTerminal;
+
+      if (fS === server && fP === pid ) return;
+    }
+
+    const pty = this.ptys.focus(server, pid);
+
+    if (pty) {
+      this.focusTab = pty;
+      pty.terminal.open(this.terminal.nativeElement)
+    };
+
+  }
+
+  ngOnInit(): void {
+    //Establece el modo oscuro (minimiza el contraste de la consola)
+    //document.documentElement.setAttribute('data-color-mode', 'dark');
+  }
+  
+  ngOnDestroy(): void {
+    // Restablece el tema al estado por defecto (automático).
+    //document.documentElement.setAttribute('data-color-mode', 'auto');
+    window.onresize = null;
+  }
+
+}

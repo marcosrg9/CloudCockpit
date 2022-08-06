@@ -1,5 +1,6 @@
 .cont {
 	height: calc(100vh - 68px - 20px);
+	height: 100vh;
 }
 
 .toolbar,
