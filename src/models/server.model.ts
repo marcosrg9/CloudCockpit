@@ -1,8 +1,8 @@
 import { Server as HTTPServer } from 'http';
 import Express from 'express';
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import cors from 'cors';
-import { PtySession } from './pty.model';
+
+import { ClientThroughSsh } from './clientThroughSsh.model';
 
 export class Server {
 	
@@ -32,8 +32,7 @@ export class Server {
 
 	private handleConnect(socket: Socket) {
 
-		new PtySession(socket);
-
+		new ClientThroughSsh(socket);
 		
 	}
 

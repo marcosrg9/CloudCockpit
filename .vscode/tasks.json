@@ -37,6 +37,14 @@
           }
         }
       }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "public",
+      "problemMatcher": [],
+      "label": "npm: start - public",
+      "detail": "ng serve"
     }
   ]
 }

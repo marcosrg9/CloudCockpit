@@ -1,10 +1,11 @@
 import { IPty, spawn } from 'node-pty';
 import { Socket } from 'socket.io';
 
+// TODO: Código muerto, eliminar.
+
 export class PtySession {
 
-	private pty: IPty
-	private buffer: string = '';
+	public pty: IPty;
 
 	constructor(private socket: Socket) {
 
@@ -43,10 +44,17 @@ export class PtySession {
 
 	}
 
-	createTerminal() {
-
-
-
+	public write(data: string) {
+		this.pty.write(data);
 	}
+
+	public kill() {
+		this.pty.kill('1');
+	}
+	
+	public get pid(): number {
+		return this.pty.pid;
+	}
+	
 
 }
