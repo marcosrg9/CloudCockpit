@@ -1,0 +1,86 @@
+<div class="cont p-4 anim-fade-in">
+	<form [formGroup]="serverForm" (ngSubmit)="submit()">
+		<h1>Añadir servidor</h1>
+		
+		<!-- Etiqueta del servidor. -->
+		<div class="form-group" [class.errored]="checkNameError()">
+			<div class="form-group-header">
+			  <label for="tag">Etiqueta</label>
+			</div>
+			<div class="form-group-body">
+			  <input class="form-control" autocomplete="off" formControlName="name" type="text" placeholder="Nombre" id="tag"/>
+			</div>
+			<p class="note error" id="pass-error">Debe asignar un nombre al servidor.</p>
+		</div>
+
+		<!-- Dirección del servidor. -->
+		<div class="form-group" [class.errored]="checkHostError()">
+			<div class="form-group-header">
+			  <label for="host">Dirección</label>
+			</div>
+			<div class="form-group-body">
+			  <input class="form-control" formControlName="host" placeholder="216.58.215.131" type="text" id="host"/>
+			</div>
+			<p class="note error" id="pass-error">La dirección del servidor no es válida.</p>
+		</div>
+
+		<!-- Puerto del servidor. -->
+		<div class="form-group" [class.errored]="checkPortError('port')">
+			<div class="form-group-header">
+			  <label for="port">Puerto SSH</label>
+			</div>
+			<div class="form-group-body">
+			  <input class="form-control" formControlName="port" placeholder="22" type="number" id="port"/>
+			</div>
+			<p class="note error" id="pass-error">El puerto SSH no es válido.</p>
+		</div>
+
+		<!-- Anulación de validación de dirección de host. -->
+		<div class="form-checkbox anim-fade-in" *ngIf="keyPressed === 'Alt' || overrideHostValidations">
+			<label><input (click)="overrideHostValidations = !overrideHostValidations" type="checkbox" aria-describedby="help-text-for-checkbox"/>Anular validación de host</label>
+			<p class="note" id="help-text-for-checkbox">El servidor no comprobará si la dirección del host es válida.<br>Esta opción es útil para direcciones IPv6.</p>
+		</div>
+
+		<!-- Compatibilidad con WoL -->
+		<div class="form-checkbox">
+			<label><input formControlName="enableWol" type="checkbox" aria-describedby="help-text-for-checkbox"/>Habilitar Wake On Lan</label>
+			<p class="note" id="help-text-for-checkbox">Wake On Lan te permite encender el servidor de forma remota.</p>
+		</div>
+
+		<!-- Parámetros WOL -->
+		<div *ngIf="serverForm.get('enableWol')?.value" class="anim-fade-in">
+
+			<!-- Dirección MAC del servidor. -->
+			<div class="form-group" [class.errored]="checkMacError()">
+				<div class="form-group-header">
+				  <label for="mac">Dirección MAC</label>
+				</div>
+				<div class="form-group-body">
+				  <input formControlName="macAddress" class="form-control" placeholder="FF:FF:FF:FF:FF:FF" type="text" id="mac"/>
+				</div>
+				<p class="note error" id="pass-error">La dirección MAC no es válida.</p>
+			</div>
+	
+			<!-- Puerto WOL del servidor. -->
+			<div class="form-group" [class.errored]="checkPortError('wolPort')">
+				<div class="form-group-header">
+				  <label for="wolport">Puerto WOL</label>
+				</div>
+				<div class="form-group-body">
+					<input formControlName="wolPort" class="form-control" placeholder="9" type="number" id="wolport"/>
+				</div>
+				<p class="note error" id="pass-error">El puerto WOL no es válido.</p>
+			</div>
+
+		</div>
+
+		<!-- Botones -->
+		<div class="Box-footer d-flex flex-row">
+
+			<button class="btn mr-2" type="button" (click)="location.back()">Cancelar</button>
+			<button class="btn btn-primary flex-auto" [class.disabled]="!serverForm.valid" type="submit">Aceptar</button>
+
+		</div>
+
+	</form>
+</div>

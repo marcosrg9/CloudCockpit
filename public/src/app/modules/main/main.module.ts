@@ -6,17 +6,23 @@ import { MainComponent } from './main.component';
 import { TermsModule } from './terms/terms.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ServerModule } from './server/server.module';
+import { ErrorMsgPipe } from 'src/app/pipes/error-msg.pipe';
+import { FilterPtysModule } from 'src/app/pipes/filter-ptys/filter-ptys.module';
+import { ConnectingPipe } from 'src/app/pipes/connecting.pipe';
 
 @NgModule({
   declarations: [
     MainComponent,
     DashboardComponent,
+    ErrorMsgPipe,
+    ConnectingPipe
   ],
   imports: [
-    CommonModule,
     MainRouterModule,
+    ServerModule,
+    CommonModule,
     TermsModule,
-    ServerModule
+    FilterPtysModule,
   ]
 })
 export class MainModule { }

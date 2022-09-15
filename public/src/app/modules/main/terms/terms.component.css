@@ -6,7 +6,7 @@ body {
 .term-tabs {
 	display: flex;
 	align-items: center;
-	overflow: scroll;
+	/* overflow: scroll; */
 }
 
 .SelectMenu-tabs {
@@ -61,7 +61,7 @@ body {
 .terminal-cont {
 	padding: 20px;
 	height: calc(100vh - 68px - 48px );
-	overflow: hidden;
+	/* overflow: hidden; */
 	position: relative;
 	background: var(--color-canvas-default);
 	display: flex;

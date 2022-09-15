@@ -1,5 +1,13 @@
 {
-    "/api/*": {
+    "/auth/*": {
+      "target": "http://localhost:3000",
+      "secure": false
+    },
+    "/server/*": {
+      "target": "http://localhost:3000",
+      "secure": false
+    },
+    "/platform/*": {
       "target": "http://localhost:3000",
       "secure": false
     },

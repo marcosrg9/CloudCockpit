@@ -15,12 +15,17 @@
       "skipFiles": ["<node_internals>/**", "node_modules/**"],
       "env": {
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
-      }
+      },
+      "runtimeExecutable": "/Users/marcos/.nvm/versions/node/v18.7.0/bin/node"
     },
     {
       "name": "Launch Chrome",
       "request": "launch",
       "type": "chrome",
+      "skipFiles": [
+        "${workspaceFolder}/public/node_modules/**/*.js",
+        "<node_internals>/**"
+      ],
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}/public"
     }

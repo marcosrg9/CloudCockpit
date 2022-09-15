@@ -1,0 +1,6 @@
+.normal {
+	fill: var(--color-ansi-blue);
+}
+.danger {
+	fill: var(--color-ansi-red);
+}

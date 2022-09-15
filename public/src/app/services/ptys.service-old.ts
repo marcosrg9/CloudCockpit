@@ -18,7 +18,7 @@ export interface pty {
 @Injectable({
   providedIn: 'root'
 })
-export class PtysService {
+export class TerminalService {
 
   public ptys: pty[] = [];
 
@@ -35,7 +35,7 @@ export class PtysService {
     this.socket.on('data', (data: { server: number, pid: number, data: string }) => {
 
       // Busca la instancia de la terminal.
-      const pty = this.ptys.find(pty => pty.server === data.server && pty.pid === data.pid);
+      const pty = this.terms.find(pty => pty.server === data.server && pty.pid === data.pid);
 
       // Envía los datos de la terminal del servidor al observable.
       if (pty) {
@@ -93,7 +93,7 @@ export class PtysService {
       //this.focus(server, pty.pid);
       //this.focusTerminal = pty;
 
-      this.ptys.push(pty);
+      this.terms.push(pty);
 
 
     })
@@ -149,15 +149,15 @@ export class PtysService {
    */
   public destroy(server: number, pid: number) {
    
-    for( let i = 0; i < this.ptys.length; i++) {
+    for( let i = 0; i < this.terms.length; i++) {
 
-      const pty = this.ptys[i];
+      const pty = this.terms[i];
 
       if (pty.server === server && pty.pid === pid) {
 
-        this.ptys.splice(i, 1);
+        this.terms.splice(i, 1);
         
-        if (this.ptys.length > 0) this.focusTerminal = this.ptys[0];
+        if (this.terms.length > 0) this.focusTerminal = this.terms[0];
         else this.router.navigate(['/main']);
 
         break;
@@ -172,7 +172,7 @@ export class PtysService {
    * @param pid Identificador de proceso.
    */
   public filterPty(server: number, pid: number) {
-    return this.ptys.find(pty => pty.server === server && pty.pid);
+    return this.terms.find(pty => pty.server === server && pty.pid);
   }
 
   /**
@@ -180,14 +180,14 @@ export class PtysService {
    * @param server Identificador del servidor.
    */
   public filterPtysByServer(server: number) {
-    return this.ptys.filter(pty => pty.server === server);
+    return this.terms.filter(pty => pty.server === server);
   }
 
   /**
    * Desenfoca todas las terminales.
    */
   public blurAll() {
-    this.ptys.forEach(pty => pty.focus = false)
+    this.terms.forEach(pty => pty.focus = false)
     this.focusTerminal = undefined;
   }
 
@@ -198,12 +198,12 @@ export class PtysService {
    */
   public focus(server: number, pid: number) {
 
-    for(let i = 0; i < this.ptys.length; i++) {
+    for(let i = 0; i < this.terms.length; i++) {
       
-      const pty = this.ptys[i];
+      const pty = this.terms[i];
       
       if (pty.pid === pid && pty.server === server) {
-        /* this.ptys[i].focus = true; */
+        /* this.terms[i].focus = true; */
         this.blurAll();
         pty.focus = true;
         this.focusTerminal = pty;
@@ -254,7 +254,7 @@ export class PtysService {
   }
 
   public getFocusedTerminal() {
-    return /* this.ptys.find(pty => pty.focus === true) || this.ptys[0]; */ this.focusTerminal;
+    return /* this.terms.find(pty => pty.focus === true) || this.terms[0]; */ this.focusTerminal;
   }
 
   /**
@@ -294,7 +294,7 @@ export class PtysService {
 
     if (!pid || typeof pid !== 'number') return;
 
-    const pty = this.ptys.get(pid);
+    const pty = this.terms.get(pid);
 
     if (pty) {
       pty.term.write('\r\n')

@@ -8,17 +8,16 @@ import { AppComponent } from './app.component';
 import { AuthModule } from './modules/auth/auth.module';
 
 import { MainModule } from './modules/main/main.module';
-import { SocketIoModule } from 'ngx-socket-io';
+import { ConnectingPipe } from './pipes/connecting.pipe';
 
 @NgModule({
   declarations: [
-    AppComponent,
+    AppComponent
   ],
   imports: [
     CommonModule,
     BrowserModule,
     AppRoutingModule,
-    SocketIoModule,
     AuthModule,
     MainModule
   ],

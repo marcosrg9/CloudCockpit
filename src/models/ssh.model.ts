@@ -16,9 +16,6 @@ export interface sizeParams {
 
 export class SshClient {
 
-	/** Emisor de eventos del cliente. */
-	public emitter = new EventEmitter();
-
 	/** * Objeto de conexión al cliente. */
 	private connection = new Client();
 
@@ -67,6 +64,11 @@ export class SshClient {
 				.connect(this.params)
 				// Escucha el evento de error de conexión y rechaza la promesa si se lanza.
 				.once('error', (err => { reject(err) }))
+				.once('close', (a) => {
+					//this.channel.close();
+					this.connection.destroy();
+				})
+				.once('end', () => { console.log('Sesión cerrada') })
 
 			} catch (error) {
 
@@ -107,7 +109,7 @@ export class SshClient {
 		if (this.channel) this.channel.write(data);
 
 		// Comprueba si el el flujo de información debe acabar.
-		if (end) this.channel.end();
+		//if (end) this.channel.end();
 
 		// Devuelve la instancia.
 		return this
@@ -142,7 +144,10 @@ export class SshClient {
 		if (!this.channel) return;
 
 		// Cierra el canal de comunicación.
-		this.channel.close()
+		this.channel.close();
+
+		// Destruye la conexión.
+		this.connection.destroy();
 
 	}
 

@@ -1,0 +1,22 @@
+Auth:
+	username:		string;
+	password: 		string;
+	description: 	string;
+
+Users:
+	username:	string;    
+	password: 	string;
+	role: 		user['role'] =	'standard';
+	enc: 		boolean      =	false;
+	servers: 	ObjectID[]   = 	[];
+
+Server:
+	name:		string;
+	host:		string;
+	port: 		number;
+	auths: 		ObjectID[]   = 	[];
+	MAC?: 		string;
+	wolPort?: 	number;
+	icon?: 		string;
+	snippets?: 	snippet[];
+	webApps?: 	webApp[];

@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SeqParser } from 'src/app/models/sequenceParser.model';
-import { Terminal } from 'src/app/models/terminal.model';
-import { pty, PtysService } from 'src/app/services/ptys.service';
+import { incommingConnection, pty, successfulConnection } from 'src/app/interfaces/pty.interface';
 import { ServersService } from 'src/app/services/servers.service';
+import { TerminalService } from 'src/app/services/terminal.service';
 
 /*
 	Flujo de instanciación
@@ -32,36 +32,37 @@ import { ServersService } from 'src/app/services/servers.service';
 	templateUrl: './terms.component.html',
 	styleUrls: ['./terms.component.css', './xterm.theme.css'],
   })
-  export class TermsComponent implements AfterViewInit, OnDestroy, OnInit {
+  export class TermsComponent implements AfterContentChecked, OnDestroy {
 
 	/** Define las pestañas de terminales. */
-	public tabs: pty[] = [];
+	public tabs: incommingConnection | successfulConnection[] = [];
 
-	constructor(public ptys: PtysService,
+	constructor(public terms: TerminalService,
 				public servers: ServersService,
 				public router: Router) {
 
 		// Navega al componente principal si no hay terminales pendientes de instanciación ni ya instanciadas.
-		if (!ptys.pending && ptys.ptys.length < 1) router.navigate(['/main'])
+		if (terms.pending.length < 1 && terms.terms.length < 1) router.navigate(['/main'])
+
+		// Asigna el foco automáticamente si solo hay una terminal.
+		if (this.terms.terms.length === 1) this.terms.terms[0].focus = true;
 	}
 
 	/**
 	 * Se ejecuta cuando se ha cargado la vista.
 	 * Este es el momento para insertar las terminales en el array.
 	 */
-	ngAfterViewInit(): void {
+	ngAfterContentChecked(): void {
 
 		// Comprueba si hay una instanciación pendiente.
-		if (this.ptys.pending) {
+		if (this.terms.pending.length > 0) {
 
-			// Inserta la terminal provisional en el array
-			this.ptys.ptys.push({ server: this.ptys.pending });
-
-			// Elimina la terminal pendiente.
-			this.ptys.pending = null;
-			
+			// Recorre las terminales pendientes de instanciar.
+			this.terms.pending.forEach((term, index) => {
+				this.terms.terms.push({ host: term.host, auth: term.auth, focus: true } as incommingConnection)
+				this.terms.pending.splice(index, 1);
+			})
 		}
-
 	}
 
 	/**
@@ -69,24 +70,20 @@ import { ServersService } from 'src/app/services/servers.service';
 	 * @param ev Evento del teclado.
 	 */
 	@HostListener('window:keydown', ['$event'])
-	private onKeyDown(ev: KeyboardEvent) {
+	public onKeyDown(ev: KeyboardEvent) {
 
-		this.ptys.write(SeqParser.parse(ev));
+		//this.terms.write(ev);
 
 	}
 
 	@HostListener('window:resize', ['$event'])
 	private resize(ev: Event) {
 		
-		this.ptys.resize();
+		this.terms.resize();
 
-	}
-
-	ngOnInit(): void {
-		
 	}
 
 	ngOnDestroy(): void {
-		
+		this.terms.removeWriteEvents();
 	}
   }

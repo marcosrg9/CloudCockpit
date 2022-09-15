@@ -1,46 +1,94 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { Socket, SocketIoConfig } from 'ngx-socket-io';
 import { Subject } from 'rxjs';
+import { ServersService } from './servers.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WebsocketsService extends Socket {
+export class WebsocketsService {
 
-  public $stream: Subject<string> = new Subject();
+  public socket: Socket = new Socket({ url: location.host, options: { autoConnect: false } });
+
+  private pending: { event: string, args: any }[] = [];
+
+  private connecting = false;
+
+  public readonly connected = '';
 
   constructor() {
 
-    super({ url: '192.168.1.3:3000' })
+    this.connected = this.socket.ioSocket.connected;
 
-    this.on('connect', () => {
-      console.log('Conectado al terminal remoto');
+    this.socket.on('connect', this.onConnect.bind(this));
 
-      /* setTimeout(() => {
-        this.socket.emit('openTerminal', (data: any) => {
-          console.log(data);
-        });
-      }, 1000) */
-    })
-
-    /* this.socket.on('data', (data: string) => {
-      this.$stream.next(data);
-    })
-
-    this.socket.on('kill', (data: any) => {
-      console.log(data)
-    })
-
-    this.socket.connect() */
+    this.socket.on('disconnect', this.onDisconnect.bind(this));
+    
+    this.socket.once('readyToListen', this.onReadyToListen.bind(this));
 
   }
 
-  /* public resize(data: {cols: number, rows: number}) {
-    this.socket.emit('resize', data);
+  public emit(event: string, ...args: any[] ) {
+    this.socket.emit(event, ...args);
   }
 
-  public kill() {
-    console.log('Matando proceso');
-    this.socket.emit('kill')
-  } */
+  /**
+   * Emite únicamente cuando el servidor indique que ha cargado los eventos.
+   */
+  public emitWhenReady(event: string, ...args: any[]) {
+
+    this.pending.push({ event, args });
+
+  }
+
+  public on(event: string, callback: Function ) {
+    this.socket.on(event, callback);
+  }
+
+  public once(event: string, callback: Function ) {
+    this.socket.once(event, callback);
+  }
+
+  public removeAllListeners(event: string | undefined) {
+    return this.socket.removeAllListeners(event);
+  }
+
+  public removeListener(event: string, callback?: Function | undefined) {
+    return this.socket.removeListener(event, callback);
+  }
+
+  /** Conecta con el servidor. */
+  public connect() {
+
+    // No hay forma de saber si un socket está en proceso de conexión.
+    // this.connecting establece una bandera, si es verdadera, se detiene la ejecución.
+    // La estructura de la plataforma obliga a solicitar varias veces la conexión.
+
+    if (this.connecting) return;
+    if (!this.connected) {
+      this.connecting = true;
+      this.socket.connect();
+    }
+  }
+
+  public disconnect() {
+    this.socket.disconnect();
+  }
+
+  private onConnect() {
+    this.connecting = false;
+    if (isDevMode()) console.log(`%c✅ Conectado al servidor WebSockets (${this.socket.ioSocket.id})`, 'background: green; color: white; padding: 2px');
+  }
+
+  private onDisconnect(reason: string) {
+    this.connecting = false;
+    if (isDevMode()) console.log(`%c⛔️ Conexión WebSockets cerrada (${reason})`, 'background: darkred; color: white; padding: 2px')
+  }
+  
+  private onReadyToListen() {
+
+    this.pending.forEach(event => this.emit(event.event, ...event.args) )
+
+  }
+
 }

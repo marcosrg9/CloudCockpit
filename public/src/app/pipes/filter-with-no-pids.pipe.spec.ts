@@ -1,4 +1,4 @@
-import { FilterWithNoPidsPipe } from './filter-with-no-pids.pipe';
+import { FilterWithNoPidsPipe } from './filter-with-no-pids/filter-with-no-pids.pipe';
 
 describe('FilterWithNoPidsPipe', () => {
   it('create an instance', () => {

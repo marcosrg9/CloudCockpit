@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { PtysService } from 'src/app/services/ptys.service';
+import { TerminalService } from 'src/app/services/terminal.service';
 import { ServersService } from 'src/app/services/servers.service';
 
 @Component({
@@ -11,8 +11,12 @@ import { ServersService } from 'src/app/services/servers.service';
 export class DashboardComponent implements OnInit {
 
   constructor(public servers: ServersService,
-              public ptys: PtysService,
-              public router: Router) { }
+              public terms: TerminalService,
+              public router: Router) {
+
+    this.servers.fetchAllServers();
+    
+  }
 
   ngOnInit(): void {
   }
@@ -21,9 +25,9 @@ export class DashboardComponent implements OnInit {
    * Abre una sesión SSH de forma directa sin pasar por el panel de servidor.
    * @param server Identificador del servidor
    */
-  public directConnect(server: number) {
-    this.ptys.pending = server;
-    this.router.navigate(['main/terms'])
+  public directConnect(server: string) {
+    /* this.terms.pending = server; */
+    //this.router.navigate(['main/terms'])
   }
 
 }

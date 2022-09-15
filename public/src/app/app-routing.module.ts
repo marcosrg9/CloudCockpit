@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CanLoadSetupWizardService } from './guards/can-load-setup-wizard.service';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' }
+  { path: 'setupWizard', canActivate: [CanLoadSetupWizardService], loadChildren: () => import('./modules/setupWizard/setupWizard.module').then(m => m.InitializeModule) },
 ];
 
 @NgModule({

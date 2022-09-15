@@ -1,0 +1,40 @@
+@media (min-width: 425px) {
+	
+	.cont {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.cont > form {
+		border: 1px solid var(--color-border-default);
+		border-radius: 6px;
+		padding: 24px;
+	}
+
+	.cont > form > .Box-footer {
+		margin: 0px -24px;
+		padding: 24px 24px;
+		padding-bottom: 0px;
+	}
+
+}
+
+@media (max-width: 425px) {
+
+	form {
+		padding-bottom: 65px;
+	}
+	
+	form > .Box-footer {
+		position: fixed;
+		bottom: 0px;
+		width: 100%;
+		padding: 16px 24px;
+		margin: 0px -24px;
+		background: var(--color-canvas-default);
+	}
+
+}

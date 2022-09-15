@@ -1,0 +1,10 @@
+.focus {
+	color: var(--color-fg-default);
+	background-color: var(--color-canvas-default);
+	border-color: var(--color-border-default);
+	border-radius: 6px 6px 0 0;
+}
+
+.focus > svg > path {
+	color: var(--color-ansi-blue);
+}

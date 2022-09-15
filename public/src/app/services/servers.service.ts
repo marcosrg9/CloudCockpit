@@ -1,36 +1,35 @@
 import { Injectable } from '@angular/core';
+import { server } from '../interfaces/server.interface';
+import { ServerModule } from '../modules/main/server/server.module';
 import { WebsocketsService } from './websockets.service';
 
-export interface server {
-	id: 		number,
-	name: 		string,
-	MAC?: 		string,
-	wolPort?: number,
-  allowWol?:boolean, 
-	icon?: 		string,
-	metal?:		boolean,
-	snippets?: { name: string, command: string }[],
-	webApps?: { name: string, url: string }[]
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServersService {
 
-  public servers: server[] = []
+  public servers: server[] | null;
 
   constructor(private socket: WebsocketsService) {
-    this.socket.once('serversData', (data: server[]) => {
-      this.servers = data;
-      console.log(data);
-      
-    })
 
-    socket.emit('getServers');
+    this.listenGlobalEvents();
+    this.fetchAllServers()
+
   }
 
-  public getServerName(id: number): string | undefined {
+  public listenGlobalEvents() {
+
+    this.socket.on('serverData', (data: server[]) => { this.servers = data })
+    this.socket.on('newServer', () => { this.fetchAllServers() })
+
+  }
+
+  public fetchAllServers() {
+    this.socket.emit('getServers')
+  }
+
+  public getServerName(id: string): string | undefined {
     return this.getServer(id)?.name;
   }
 
@@ -38,19 +37,27 @@ export class ServersService {
    * Obtiene un servidor por su identificador.
    * @param id Identificador del servidor.
    */
-  public getServer(id: number): server | undefined {
-    return this.servers.find(server => id === server.id);
+  public getServer(id: string): server | undefined {
+    if (this.servers) return this.servers.find(server => id === server._id)
+    else return undefined;
   }
 
   /**
    * Envía una señal de emisión de paquete mágico para encender un servidor.
    * @param id Identificador del servidor.
    */
-  public sendMagicPkg(id: number): void {
+  public wakeUp(id: string): void {
 
     const server = this.getServer(id)
 
-    if (server && server.allowWol) this.socket.emit('WOL', id);
+    if (server && server.MAC) this.socket.emit('wakeUp', id);
 
+  }
+
+  /**
+   * Limpia la lista de servidores.
+   */
+  public cleanUp() {
+    this.servers = null;
   }
 }

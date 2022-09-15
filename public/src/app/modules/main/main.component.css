@@ -2,9 +2,18 @@
 	height: calc(100% - 68px);
 }
 
+.dropdown-menu.dropdown-menu-sw > li .dropdown-item:not([role='separator']),
+.dropdown-menu.dropdown-menu-sw > div > li .dropdown-item:not([role='separator']) {
+	cursor: pointer;
+}
+
 .notifs {
 	position: absolute;
 	right: 0;
+	z-index: 99;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
 }
 
 #terminalControl {
