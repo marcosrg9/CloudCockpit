@@ -39,7 +39,9 @@ class SocketStore {
 	 * @param id Identificador del socket.
 	 * @param socket Socket del cliente (abstracción de socket).
 	 */
-	public add(id: string, socket: ClientSocket) { this.store.set(id, socket) }
+	public add(id: string, socket: ClientSocket) {
+		this.store.set(id, socket)
+	}
 
 	/**
 	 * Obtiene un socket por el identificador.
@@ -109,3 +111,4 @@ class SocketStore {
 }
 
 export const socketStore = new SocketStore();
+global.socketStore = socketStore;

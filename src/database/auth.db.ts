@@ -11,7 +11,7 @@ class AuthDatabase extends AbstractDataManagerById<Auth> {
 		super(Auth, [ 'username', 'password' ]);
 	}
 
-	public async newCredential(data: { username: string, password: string, description: string }) {
+	public async newCredential(data: { username: string, password: string, description?: string }) {
 
 		// Valida los campos.
 		const validation = credentialsValidator.validate(data, { stripUnknown: true });

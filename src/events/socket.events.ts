@@ -3,6 +3,7 @@ import { sessionStore } from '../database/stores/session.store';
 import { socketStore } from '../database/stores/socket.store';
 import { userStore } from '../database/stores/user.store';
 import { AdminEvents } from './handlers/admin.events';
+import { DeveloperEvents } from './handlers/developer.events';
 import { GlobalEvents } from './handlers/global.events';
 import { TerminalEvents } from './handlers/terminal.events';
 
@@ -14,6 +15,7 @@ export class ClientSocket {
 	public global: GlobalEvents;
 	public terminal: TerminalEvents;
 	public admin: AdminEvents;
+	public developer: DeveloperEvents;
 
 	/**
 	 * Abstracción de socket de SocketIO.
@@ -53,19 +55,26 @@ export class ClientSocket {
 		// Si la sesión no existe, se cierra la conexión.
 		if (!session) return this.socket.disconnect(true);
 		// Si existe, se enlaza el socket con la sesión.
+		// TODO: Adjunta el socket si existe la sesión, pero después lo añade al almacén.
+		// TODO: Comprobar si el duplicado de salida proviene de aquí.
 		else session.attachSocket(this.socket.id);
 
 		// Instancia los controladores de eventos.
 		this.global = new GlobalEvents(this.socket);
 
 		// Instancia el controlador de eventos de terminal si existe alguna.
-		if (userStore.get(this.socket.handshake.session.auth._id).getAllTerminals().size > 0) {
+		if (userStore.get(this.socket.handshake.session.auth._id).termStore.size > 0) {
 			this.terminal = new TerminalEvents(this.socket)
 		};
 
 		// Instancia los eventos de administrador.
 		if (this.socket.handshake.session.auth.role === 'admin') {
 			this.admin = new AdminEvents(this.socket)
+		}
+
+		if (process.env.NODE_ENV === 'dev' || process.env.FORCE_DEV === 'true') {
+			this.developer = new DeveloperEvents(this.socket);
+			console.log(`${new Date().toISOString()} – ⚠️ Eventos de desarrollador cargados.`);
 		}
 
 		// Se almacena este socket en el almacén.
@@ -75,6 +84,7 @@ export class ClientSocket {
 		 * vivo, para ello, se almacena de forma automática desde dentro.
 		 * Es la opción menos cutre de las posibles.
 		 */
+		// BUG: Revisar esto con la función attachSocket.
 		socketStore.add(this.socket.id, this);
 
 		this.socket.emit('readyToListen');

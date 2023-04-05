@@ -1,6 +1,7 @@
+import { platform, arch, cpus, version, freemem, totalmem, hostname, release } from 'os'
 import { Request, Response } from 'express'
 import { getClientIp } from 'request-ip'
-
+import { main } from '../../main';
 
 export abstract class PlatformController {
 
@@ -15,6 +16,30 @@ export abstract class PlatformController {
 		res.setHeader('content-type', 'text/plain')
 		return res.send(ip);
 		
+	}
+
+	public static getPlatformDigest(req: Request, res: Response) {
+
+		const data = {
+			platform: platform(),
+			arch: arch(),
+			version: version(),
+			release: release(),
+			memory: {
+				free: freemem(),
+				used: totalmem() - freemem(),
+				total: totalmem(),
+			},
+			env: {
+				overDocker: main.runningOverDocker,
+				devEnv: process.env.NODE_ENV === 'dev' ? true : false,
+			},
+			host: hostname(),
+			cpus: cpus(),
+		};
+
+		res.json(data);
+
 	}
 
 }

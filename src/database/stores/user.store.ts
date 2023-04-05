@@ -76,6 +76,11 @@ class UserStore {
 
 	}
 
+	public getAllUsers() {
+		return Array.from(this.store.values());
+	}
+
 }
 
 export const userStore = new UserStore();
+global.userStore = userStore;

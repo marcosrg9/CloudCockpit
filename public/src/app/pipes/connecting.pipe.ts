@@ -1,16 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { incommingConnection, processingConnection } from '../interfaces/pty.interface';
+import { WebTerminal } from '../interfaces/pty.interface';
 
 @Pipe({
-  name: 'connecting'
+  name: 'connecting',
+  pure: false
 })
 export class ConnectingPipe implements PipeTransform {
 
-  transform(value: processingConnection[], ...args: unknown[]): processingConnection[] {
+  transform(value: WebTerminal[], ...args: unknown[]): WebTerminal[] {
 
     return value.filter(v => {
-      if (v.status === 'connecting') return v
-      if (!v.status) return v
+      if (v.connection.status === 'connecting') return v
+      if (!v.connection.status) return v
     })
     
   }

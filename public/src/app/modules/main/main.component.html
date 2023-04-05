@@ -1,3 +1,7 @@
+<head>
+	<meta *ngIf="!darkmode" name="theme-color" content="#f6f8fa"/>
+	<meta *ngIf="darkmode" name="theme-color" content="#010409"/>
+  </head>
 <div class="cont anim-fade-in">
 	<!-- <div class="Header" data-color-mode="dark" data-dark-theme="dark"> -->
 	<div class="Header color-bg-inset color-fg-default">
@@ -9,20 +13,20 @@
 		<div class="Header-item Header-item--full"></div>
 
 		<!-- Indicador de estado de conexión entrante -->
-		<div class="Header-item" *ngIf="($any(terms).terms | connecting).length > 0">
+		<div class="Header-item" *ngIf="(terms.store.reflectedTerminalStoreArray | connecting).length > 0">
 			<svg class="Toast--spinner" viewBox="0 0 32 32" width="16" height="16"><path fill="#959da5" d="M16 0 A16 16 0 0 0 16 32 A16 16 0 0 0 16 0 M16 4 A12 12 0 0 1 16 28 A12 12 0 0 1 16 4"/><path fill="#ffffff" d="M16 0 A16 16 0 0 1 32 16 L28 16 A12 12 0 0 0 16 4z"></path></svg>
 		</div>
 		
 		<div class="Header-item">
 			<div class="pl-2">
-				<details class="dropdown details-reset details-overlay d-inline-block">
+				<details class="dropdown details-reset details-overlay d-inline-block" (click)="toggleNavbarHdr()" (open)="toggleNavbarHdr()" [open]="status.navbarHdr">
 				<summary class="d-inline avatar p-2 border-0" aria-haspopup="true">
 					<!-- <svg class="octicon octicon-clippy mr-1" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"></path></svg> -->
 					<span style="font-weight: 600">{{ auth.user!.username.slice(0, 1) | titlecase }}</span>
 					<!-- <div class="dropdown-caret ml-1"></div> -->
 				</summary>
 			
-				<ul class="dropdown-menu dropdown-menu-sw">
+				<ul class="dropdown-menu dropdown-menu-sw" (click)="status.navbarHdr = false">
 					<div class="dropdown-header">
 						Autenticado como
 					  </div>
@@ -30,7 +34,7 @@
 						<span style="font-weight: 600;">{{ auth.user!.username | titlecase }}</span>
 					</a>
 					<li class="dropdown-divider" role="separator"></li>
-					<li><a class="dropdown-item">
+					<li (click)="toggleCmdPalette()"><a class="dropdown-item">
 						<svg class="octicon octicon-clippy mr-2" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M11.5 7a4.499 4.499 0 11-8.998 0A4.499 4.499 0 0111.5 7zm-.82 4.74a6 6 0 111.06-1.06l3.04 3.04a.75.75 0 11-1.06 1.06l-3.04-3.04z"></path></svg>
 						Buscar
 					</a></li>
@@ -131,7 +135,13 @@
 	</div>
 
 	<!-- <div #termCont id="terminalControl"></div> -->
-	 
+	
+	<app-palette class="commandPalette"
+		(close)="toggleCmdPalette()"
+		(clickInside)="status.navbarHdr = false"
+		*ngIf="status.commandPalette">
+	</app-palette>
+
 	<router-outlet></router-outlet>
 	<!-- <app-terminal></app-terminal> -->
 	<!-- <div *ngIf="ptys.ptys.size === 0" class="d-flex flex-column flex-justify-center flex-content-center" style="height: 100%;">

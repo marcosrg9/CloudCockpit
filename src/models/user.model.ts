@@ -1,8 +1,15 @@
+import { minimalIdentification } from '../../public/src/app/interfaces/pty.interface';
 import { auths } from '../database/auth.db';
+import { Auth } from '../database/entity/Auth';
+import { Server } from '../database/entity/Server';
 import { servers } from '../database/servers.db';
 import { sessionStore } from '../database/stores/session.store';
 import { socketStore } from '../database/stores/socket.store';
-import { connectionError, inProgressConnection, successfulConnection, writeEvent } from '../interfaces/connection.interface';
+import { TerminalStore } from '../database/stores/terminal.store';
+import { connectionError, writeEvent } from '../interfaces/connection.interface';
+import { ConnectedSshSession, ConnectingSshSession, WaitingSshSession } from '../interfaces/unifiedStructure.interface';
+import { prepareTerminalValidator } from '../validators/prepareParams.validator';
+import { logger } from './logger.model';
 import { sizeParams } from './ssh.model';
 import { Terminal } from './terminal.model';
 
@@ -12,9 +19,15 @@ export class User {
 	private sessions: 	string[] = [];
 
 	/** Almacena las terminales. */
-	private terminals = new Map<string, Terminal>();
+	public termStore: TerminalStore;
 
-	constructor(public readonly user: string) { }
+	/**
+	 * Instancia de un usuario en memoria.
+	 * @param user Identificador del usuario.
+	 */
+	constructor(public readonly user: string) {
+		this.termStore = new TerminalStore(this);
+	}
 
 	/**
 	 * Emite un evento a una terminal concreta.
@@ -23,7 +36,7 @@ export class User {
 	public emitToTerm(data: writeEvent) {
 
 		// Obtiene una terminal por el id.
-		const terminal = this.terminals.get(data.pid);
+		const terminal = this.termStore.get(data.pid);
 
 		// Escribe en la terminal.
 		if (terminal) terminal.write(data.data);
@@ -35,6 +48,7 @@ export class User {
 	 * @param channel Canal de datos.
 	 * @param message Mensaje.
 	 */
+	// BUG: Identificadores de datos repetidos en el almacén. Salida duplicada en el cliente.
 	public broadcast(channel: string, ...message: any) {
 
 		// Recorre todas las sesiones.
@@ -57,8 +71,68 @@ export class User {
 
 				})
 
-
 			}
+
+		})
+
+	}
+
+	public prepareTerminal(host: string, auth: minimalIdentification['auth']): Promise<WaitingSshSession> {
+		
+		// Valida los parámetros.
+		const validator = prepareTerminalValidator.validate({ host, auth }, { stripUnknown: true });
+
+		// Si la validación ha producido error, devuelve una promesa rechazada.
+		if (validator.error) return Promise.reject({ error: 'Validation error', reason: validator.error });
+
+		let queries: Promise<[PromiseSettledResult<Server>,PromiseSettledResult<Auth | { _id: string, username: string, password: string }>]>
+
+		if (typeof auth === 'string') {
+			// Prepara las consultas para resolver los datos de servidor y credenciales.
+			queries = Promise.allSettled([
+				servers.getRecordById(host),
+				auths.getRecordById(auth)
+			])
+		} else {
+			queries = Promise.allSettled([
+				servers.getRecordById(host),
+				Promise.resolve({...auth, _id: 'manual'})
+			])
+		}
+
+		return new Promise((resolve, reject) => {
+			// Realiza las consultas.
+			queries.then(([s, a]) => {
+				
+				if (s.status === 'rejected' || a.status === 'rejected') return reject({ error: 'Query error', reason: { server: s, auths: a }});
+	
+				// Extrae los parámetros.
+				const { _id: sid, host, port, auths, name } = s.value;
+				const { _id: aid, username, password } = a.value;
+	
+				// Instancia la terminal.
+				const term = new Terminal(sid, host, port, this, aid, username, password);
+	
+				// Asigna la terminal instanciada al almacén.
+				this.termStore.set(term.pid, term);
+
+				const data: WaitingSshSession = {
+					status: 'waiting',
+					host: sid,
+					history: '',
+					pid: term.pid,
+					at: term.at,
+					auth,
+					resolved: { host: name, user: username, port: term.port.toString() }
+				}
+	
+				// Devuelve una promesa resuelta con el pid de la conexión.
+				resolve(data);
+	
+			})
+			.catch(err => {
+				console.error(err);
+			})
 
 		})
 
@@ -66,79 +140,56 @@ export class User {
 
 	/**
 	 * Instancia una nueva terminal.
-	 * @param server Identificador del servidor.
-	 * @param credentials Identificador de las credenciales.
+	 * @param pid Identificador de conexión.
 	 * @param size Parámetros de dimensiones.
 	 */
-	public openTerminal(server: string, credentials: string, size: sizeParams) {
+	public async openTerminal(pid: string, size: sizeParams) {
 
-		// Prepara las consultas a la base de datos.
-		const queries = Promise.allSettled([
-			servers.getRecordById(server),
-			auths.getRecordById(credentials)
-		]);
+		// Busca la terminal.
+		const term = this.termStore.get(pid);
 
-		// Resuelve las consultas.
-		queries.then(([s, a]) => {
+		// Comprueba si no ha encontrado la terminal o no es válida.
+		if (!term || !(term instanceof Terminal)) return Promise.reject('Terminal no encontrada');
 
-			// Comprueba si ha fallado la búsqueda.
-			if (s.status === 'rejected' || a.status === 'rejected') {
+		// Reestablece las dimensiones de la terminal.
+		term.resize(size);
 
-				return this.broadcast('openTerminalError', {
-					host: server,
-					auth: credentials,
-					errors: { server: s, auth: a }
-				} as unknown as connectionError)
+		const { serverId, authId, server, username, port } = term;
 
-			}
+		this.broadcast('connectionUpdate', {
+			status: term.status,
+			pid: term.pid,
+			at: term.at,
+			host: serverId,
+			auth: authId,
+			resolved: { host: server, user: username, port }
+		} as ConnectingSshSession)
 
-			// Extrae los parámetros.
-			const { _id: sid, host, port, auths } = s.value;
-			const { _id: aid, username, password } = a.value;
+		// Intenta conectarse con los parámetros indicados.
+		return term.connect()
+		.then(pid => {
 
-			// Instancia la terminal.
-			const term = new Terminal(sid, host, port, this, aid, username, password, size)
+			const { serverId, authId, server, username, port } = term;
 
+			// Emite a los usuarios el estado de la conexión.
 			this.broadcast('connectionUpdate', {
 				status: term.status,
-				host: server,
-				auth: credentials,
-				resolved: { host, user: username, port }
-			} as inProgressConnection)
+				pid: pid,
+				at: term.at,
+				host: serverId,
+				auth: authId,
+				resolved: { host: server, user: username, port }
+			} as ConnectedSshSession);
 
-			// Intenta conectarse con los parámetros indicados.
-			term.connect()
-			.then(pid => {
-
-				// Avisa a los usuarios de que la conexión ha sido abierta.
-				this.broadcast('connectionUpdate', {
-					status: term.status,
-					pid: term.pid,
-					at: term.at,
-					host: server,
-					auth: credentials,
-					resolved: { host, user: username, port }
-				} as successfulConnection);
-				
-				// Añade la terminal al mapa.
-				this.terminals.set(pid, term);
-
-			})
-			.catch(err => {
-
-				this.broadcast('openTerminalError', {
-					host: server,
-					auth: credentials,
-					error: err
-				} as connectionError)
-
-			})
-
+		})
+		.catch(err => {
+			logger.error('terminal', err)
+			console.warn(err)
 		})
 
 	}
 
-	public getAllTerminals() { return this.terminals };
+	public getAllTerminals() { return this.termStore };
 
 	/**
 	 * Devuelve todas las sesiones de los dispositivos conectados con esta cuenta.

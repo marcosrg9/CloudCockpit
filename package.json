@@ -1,10 +1,9 @@
 {
    "name": "cloudcockpit",
-   "version": "0.0.2",
+   "version": "0.0.3",
    "description": "",
    "main": "main.ts",
    "dependencies": {
-      "@airbnb/node-memwatch": "^2.0.0",
       "bcryptjs": "2.4.3",
       "cors": "2.8.5",
       "dotenv": "16.0.1",
@@ -17,9 +16,11 @@
       "socket.io": "^4.0.1",
       "ssh2": "1.11.0",
       "typeorm": "0.3.7",
+      "web-push": "^3.5.0",
       "wol": "1.0.7"
    },
    "devDependencies": {
+      "@airbnb/node-memwatch": "^2.0.0",
       "@types/airbnb__node-memwatch": "^2.0.0",
       "@types/bcryptjs": "2.4.2",
       "@types/cors": "2.8.12",
@@ -30,6 +31,7 @@
       "@types/request-ip": "0.0.37",
       "@types/ssh2": "1.11.5",
       "@types/uuid": "8.3.4",
+      "@types/web-push": "^3.3.2",
       "@types/wol": "1.0.1",
       "reflect-metadata": "0.1.13",
       "ts-node": "10.7.0",
@@ -37,7 +39,7 @@
    },
    "scripts": {
       "start": "ts-node main.ts",
-      "public": "cd public && ng serve",
+      "public": "cd public && ng serve --host=0.0.0.0",
       "typeorm": "typeorm-ts-node-commonjs"
    },
    "keywords": [],

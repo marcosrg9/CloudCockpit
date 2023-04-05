@@ -13,7 +13,7 @@ CloudCockpit es una plataforma para administrar servidores remotos mediante el p
 
 Para gestionar las terminales y conexiones en el servidor se usa NodeJS. Para representar la plataforma y las terminales se usa Angular. Para la persistencia de datos se usa MongoDB.
 
-Cuando el servidor SSH responde, el servidor de CloudCockpit se encarga de redirigir la salida al cliente, que posteriormente trata los datos usando [xtermjs](https://xtermjs.org).
+<!-- Cuando el servidor SSH responde, el servidor de CloudCockpit se encarga de redirigir la salida al cliente, que posteriormente trata los datos usando [xtermjs](https://xtermjs.org). -->
 
 ## 🔄 Actualización
 
@@ -148,7 +148,7 @@ Para configurarlo es necesario establecer una clave como valor de la variable de
 
 	DB_CYPH=7w!z%C&F)J@NcRfUjXn2r5u8x/A?D(G-
 
-**⚠️ Advertencia** Debido a que CloudCockpit no puede determinar con exactitud si los datos han sido cifrados o no, es conveniente establecer una clave criptográfica antes de comenzar a usar la plataforma por primera vez para que no haya inconsistencia de datos cifrados en la base de datos, es decir, que el servidor dará por hecho que todo dato que debería estar cifrado, estará cifrado, y no parcialmente. Revisar las notas del desarrollador al final de este documento.
+**⚠️ Advertencia** Debido a que CloudCockpit no puede determinar con exactitud si los datos han sido cifrados o no, es conveniente establecer una clave criptográfica antes de comenzar a usar la plataforma por primera vez para que evitar inconsistencia de datos cifrados en la base de datos, es decir, que el servidor dará por hecho que todo dato que debería estar cifrado, estará cifrado, y no parcialmente. Revisar las notas del desarrollador al final de este documento.
 
 ## 🔍 Depuración
 

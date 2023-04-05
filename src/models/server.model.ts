@@ -40,7 +40,11 @@ export class Server {
 		this.server = new HTTPServer(this.api);
 
 		// Instancia un servidor WebSockets.
-		this.sockets = new SocketIOServer(this.server, { cors: { origin: '*' } });
+		this.sockets = new SocketIOServer(this.server, {
+			cors: { origin: '*', credentials: true },
+			pingInterval: process.env.NODE_ENV === 'dev' ? 999999999 : 25000,
+			pingTimeout: process.env.NODE_ENV === 'dev' ? 999999999 : 20000
+		});
 
 		// Carga el manejador del evento de conexión de clientes al servidor WebSockets.
 		this.sockets.on('connect', this.handleConnect);

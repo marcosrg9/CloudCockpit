@@ -9,6 +9,7 @@ import { ServerModule } from './server/server.module';
 import { ErrorMsgPipe } from 'src/app/pipes/error-msg.pipe';
 import { FilterPtysModule } from 'src/app/pipes/filter-ptys/filter-ptys.module';
 import { ConnectingPipe } from 'src/app/pipes/connecting.pipe';
+import { PaletteModule } from './palette/palette.module';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { ConnectingPipe } from 'src/app/pipes/connecting.pipe';
     CommonModule,
     TermsModule,
     FilterPtysModule,
+    PaletteModule
   ]
 })
 export class MainModule { }

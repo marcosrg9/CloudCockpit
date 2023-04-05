@@ -18,4 +18,6 @@ export const AppDataSource = new DataSource({
     entities:    [Platform, User, Server, Auth],
     migrations:  [],
     subscribers: [],
+    // MONGODB Driver Error fix for CSDM (Current Server Discovery and Monitoring engine)
+    useUnifiedTopology: true
 });

@@ -1,4 +1,4 @@
-.authSelector {
+.authSelector, .manualLogin {
 	position: absolute;
 	left: 50%;
 	top: 50%;
@@ -10,6 +10,18 @@
 .authSelector > .selector {
 	max-height: 400px;
 	overflow: auto;
+}
+
+.manualLogin {
+	max-width: 320px;
+}
+
+.manualLogin > :nth-child(2) {
+	display: flex;
+}
+
+.manualLogin > :nth-child(2) > * {
+	width: 100%;
 }
 
 .actions, .apps, .snippets {
@@ -44,13 +56,13 @@
 }
 
 @media (max-width: 1024px) {
-	.authSelector {
+	.authSelector, .manualLogin {
 		width: 515px;
-	}	
+	}
 }
 
 @media (max-width: 765px) {
-	.authSelector {
+	.authSelector, .manualLogin {
 		width: 90%;
 	}
 }

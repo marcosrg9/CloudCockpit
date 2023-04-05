@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import dotenv from 'dotenv';
 import { platform } from '../database/platform.db';
 
 export abstract class ServerController {
@@ -21,6 +22,8 @@ export abstract class ServerController {
 
 	public static existsCypher(req: Request, res: Response) {
 
+		dotenv.config({ override: true });
+		
 		const { DB_CYPH } = process.env;
 
 		if (DB_CYPH && DB_CYPH.length === 32) {

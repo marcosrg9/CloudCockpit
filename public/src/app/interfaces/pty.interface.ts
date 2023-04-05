@@ -1,115 +1,73 @@
 import { Terminal } from '../models/terminal.model';
-import { incommingConnection as iC, processingConnection as pC, inProgressConnection as ipC, successfulConnection as sC } from '../../../../src/interfaces/connection.interface'
+import { ConnectedSshSession, ConnectingSshSession, connection, SshSession, WaitingSshSession } from '../../../../src/interfaces/unifiedStructure.interface'
 
-export type terminalType = incommingConnection | processingConnection | inProgressConnection | successfulConnection;
-
-/** Datos de la terminal. */
-export interface withTerminalData {
-
-	/** Instancia de la terminal. */
-	terminal: Terminal;
-	/** Contenedor de la terminal. */
-	element: HTMLDivElement;
-	/** Indicador de foco. */
-	focus?: boolean;
-	/** Historial temporal. */
-	history?: string;
-
-}
-
-export interface minimalIdentify {
-
-	host: string;
-	auth: string
-	pid?: string;
-
-}
+/** 7 de Enero de 2023 */
 
 /**
- * Conexión solicitada por el cliente.
- * Se trata de un objeto simple, no contiene la instancia de la terminal ni su contenedor.
+ * Terminal del lado del cliente.
  */
-export interface incommingConnection extends iC {
+export interface AbstractWebTerm {
 
-	/** Indica si la terminal tiene el foco. */
-	focus: boolean;
-	/** Historial temporal. */
-	history?: string;
-}
-
-/**
- * El servidor ha recibido la conexión y la está procesando.
- * Incluye instancia de terminal.
- */
-export interface processingConnection extends pC, withTerminalData { }
-
-/**
- * El servidor se está conectando con el servidor SSH.
- */
-export interface inProgressConnection extends ipC, withTerminalData  { }
-
-/**
- * El servidor ha logrado conectarse correctamente al servidor SSH.
- */
-export interface successfulConnection extends sC, withTerminalData { }
-
-
-
-
-
-
-
-
-
-
-
-// TODO: Eliminar esto.
-export interface pty {
-	
-	/** Dirección del servidor. */
-	server?: string;
-
-	/** Identificador del servidor. */
-	serverId: string;
-
-	/** Nombre de la cuenta de usuario. */
-	auth?: string;
-
-	/** Identificador de credencial. */
-	authId: string;
-	
-	/** Identificador de proceso. */
-	pid?: string;
-
-	/** Puerto de conexión. */
-	port?: string;
-
-	/** Instancia de la terminal. */
 	terminal?: Terminal;
-
-	/** Referencia del elemento HTML. */
 	element?: HTMLDivElement;
-
-	/** Historial del terminal. */
-	history?: string;
-
-	/** Indicador de foco de terminal. */
 	focus?: boolean;
-
+	connection: connection
 }
 
-export interface completePty extends pty {
+export interface WaitingWebTerminal extends AbstractWebTerm {
+	connection: WaitingSshSession
+}
 
-	server: string;
+export interface ConnectingWebTerminal extends AbstractWebTerm {
+	connection: ConnectingSshSession
+}
 
-	serverId: string;
-	pid: string;
-	auth: string;
-	port: string;
-	terminal: Terminal;
-	element: HTMLDivElement;
-	focus: boolean
-	
+export interface ConnectedWebTerminal extends AbstractWebTerm {
+	connection: ConnectedSshSession
+}
+
+export type WebTerminal = (ConnectedWebTerminal | WaitingWebTerminal | ConnectingWebTerminal);
+
+export type IndexedObject<T> = { [ key: string ]: T };
+
+export type WebTerminalStore = Map<string, IndexedObject<WaitingWebTerminal | ConnectingWebTerminal | ConnectedWebTerminal>>;
+
+export type manualAuth = {
+	username: string,
+	password: string
+}
+
+export type minimalIdentification = {
+	host: WebTerminal['connection']['host']
+	auth: WebTerminal['connection']['auth'] | manualAuth
+	pid?: ConnectedWebTerminal['connection']['pid']
+}
+
+/**
+ * Determina si un objeto es de tipo ConnectedWebTerminal
+ * @param term Terminal a comprobar
+ * @returns Booleano que determina si el objeto es de tipo ConnectedWebTerminal
+ */
+export const isConnectedWebTerm = (term: WebTerminal): term is ConnectedWebTerminal => {
+	return term.connection.status === 'connected';
+}
+
+/**
+ * Determina si un objeto es de tipo WaitingWebTerminal
+ * @param term Terminal a comprobar
+ * @returns Booleano que determina si el objeto es de tipo WaitingWebTerminal
+ */
+export const isWaitingWebTerm = (term: WebTerminal): term is WaitingWebTerminal => {
+	return term.connection.status === 'waiting';
+}
+
+/**
+ * Determina si un objeto es de tipo ConnectingWebTerminal
+ * @param term Terminal a comprobar
+ * @returns Booleano que determina si el objeto es de tipo ConnectingWebTerminal
+ */
+export const isConnectingWebTerm = (term: WebTerminal): term is ConnectingWebTerminal => {
+	return term.connection.status === 'connecting';
 }
 
 interface sshLibErr {

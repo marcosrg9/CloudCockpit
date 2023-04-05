@@ -1,5 +1,4 @@
 import { Client, ClientChannel, ConnectConfig } from 'ssh2';
-import { EventEmitter } from 'stream';
 
 export interface sizeParams {
 
@@ -63,12 +62,16 @@ export class SshClient {
 				// Conecta usando los parámetros indicados.
 				.connect(this.params)
 				// Escucha el evento de error de conexión y rechaza la promesa si se lanza.
-				.once('error', (err => { reject(err) }))
+				.once('error', (err => {
+					reject(err)
+				}))
 				.once('close', (a) => {
 					//this.channel.close();
 					this.connection.destroy();
 				})
-				.once('end', () => { console.log('Sesión cerrada') })
+				.once('end', (...a) => {
+					console.log('Sesión cerrada')
+				})
 
 			} catch (error) {
 
@@ -106,7 +109,11 @@ export class SshClient {
 	public write(data: string, end = true) {
 
 		// Comprueba si hay un canal de comunicación disponible, entonces escribe en él.
-		if (this.channel) this.channel.write(data);
+		if (!this.channel) return;
+		
+		this.channel.write(data, 'utf-8', (err) => {
+			if (err) console.error(err);
+		});
 
 		// Comprueba si el el flujo de información debe acabar.
 		//if (end) this.channel.end();
@@ -130,6 +137,8 @@ export class SshClient {
 		if (!this.channel) return;
 		
 		const { cols, rows, height, width } = params;
+
+		this.size = params;
 
 		if (cols && rows && height && width) this.channel.setWindow(rows, cols, height, width)
 

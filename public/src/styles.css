@@ -1,5 +1,10 @@
 :root {
 	--personal-blue1: #0080FF;
+	--personal-blue1_RGB: 0, 128, 255;
+	--foreground: black;
+	--foreground_RGB: 0,0,0;
+	--background: white;
+	--background_RGB: 255,255,255;
 }
 
 body {
@@ -10,6 +15,10 @@ body {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+}
+
+* {
+	-webkit-font-smoothing: antialiased;
 }
 
 .icon {
@@ -36,6 +45,15 @@ ng-terminal > * > .resize-handle {
 
 .pointer {
 	cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--foreground: white;
+		--foreground_RGB: 255,255,255;
+		--background: black;
+		--background_RGB: 0,0,0;
+	}
 }
 
 /* @font-face {

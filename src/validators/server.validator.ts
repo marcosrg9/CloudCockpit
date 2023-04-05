@@ -1,14 +1,14 @@
 import joi from 'joi';
 import { joiHostValidation, joiMACValidation, joiPortValidation } from './addresses.validator';
-import { ObjectID } from 'typeorm';
+import { ObjectId } from 'mongodb';
 
-const isValidMongoID: joi.CustomValidator = (value: string | string[] | ObjectID | ObjectID[], helper) => {
+const isValidMongoID: joi.CustomValidator = (value: string | string[] | ObjectId | ObjectId[], helper) => {
 
-	// Comprueba si es una instancia de ObjectID de mongo.
-	if (value instanceof ObjectID) return value;
+	// Comprueba si es una instancia de ObjectId de mongo.
+	if (value instanceof ObjectId) return value;
 	
 	// Comprueba si el tipo del identificador es permitido.
-	if (typeof value !== 'string' && typeof value !== 'object') return helper.error('Owner ID unkown type');
+	//if (typeof value !== 'string' && typeof value !== 'object') return helper.error('Owner ID unkown type');
 
 	// string | string[] | ObjectID[]
 
@@ -16,7 +16,7 @@ const isValidMongoID: joi.CustomValidator = (value: string | string[] | ObjectID
 	if (typeof value === 'string') {
 
 		// Trata de instanciar un identificador de mongo.
-		try { return new ObjectID(value)
+		try { return new ObjectId(value)
 		// Se ha producido un error en la instanciación, el identificador no es válido.
 		} catch { return helper.error(`User id ${value} is not a valid identifier.`) }
 		
@@ -32,7 +32,7 @@ const isValidMongoID: joi.CustomValidator = (value: string | string[] | ObjectID
 
 		// string[] | ObjectID[]
 
-		const checks: ObjectID[] = [];
+		const checks: ObjectId[] = [];
 		
 		// Comprueba la validez del identificador.
 		for (let id of value) {
@@ -40,13 +40,13 @@ const isValidMongoID: joi.CustomValidator = (value: string | string[] | ObjectID
 			// string | ObjectID
 
 			// Si el id es una instacia de ObjectID, continúa con el siguiente índice.
-			if (id instanceof ObjectID) checks.push(id);
+			if (id instanceof ObjectId) checks.push(id);
 
 			// string
 
 			// Intenta instanciar el identificador.
 			try {
-				checks.push(new ObjectID(id as string))
+				checks.push(new ObjectId(id as string))
 			}
 			// Si se produce un error es porque no es un id válido.
 			catch { return helper.error(`User ID ${id} is not a valid MongoID.`) };

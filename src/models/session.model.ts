@@ -77,7 +77,7 @@ export class Session {
 	}
 
 	/**
-	 * Enlazar la sesión con un socket y detiene el temporizador de destrucción.
+	 * Enlaza la sesión con un socket y detiene el temporizador de destrucción.
 	 * @param id Nuevo identificador del socket.
 	 */
 	public attachSocket(id: string) {

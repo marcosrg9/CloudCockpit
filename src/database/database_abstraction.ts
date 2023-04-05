@@ -1,4 +1,3 @@
-import { ObjectID } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { decrypt } from '../helpers/cypher.helper';
 import { AppDataSource } from './data-source';

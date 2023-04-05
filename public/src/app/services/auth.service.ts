@@ -22,8 +22,7 @@ export class AuthService {
   constructor(private router: Router,
               private http: HttpClient,
               private socket: WebsocketsService,
-              private servers: ServersService,
-              private terms: TerminalService) {
+              private servers: ServersService) {
 
     this.socket.on('authError', () => {
       this.logout();
@@ -77,13 +76,11 @@ export class AuthService {
       next: () => {
         this.user = undefined;
         this.servers.cleanUp();
-        this.terms.cleanUp();
         this.router.navigate(['/login'])
       },
       error: () => {
         this.user = undefined;
         this.servers.cleanUp();
-        this.terms.cleanUp();
         this.router.navigate(['/login'])
       }
     });

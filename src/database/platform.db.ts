@@ -32,7 +32,7 @@ class PlatformManager extends AbstractDataManagerById<Platform> {
 
 		// Obtiene los datos de la plataforma y continúa la ejecución si falla.
 		// Significa que no existen datos.
-		this.getPlatformParams()
+		return this.getPlatformParams()
 		.catch(() => {
 
 			// Genera una nueva instancia de la plataforma.
@@ -40,7 +40,7 @@ class PlatformManager extends AbstractDataManagerById<Platform> {
 			platform.port = 3000;
 	
 			// Inserta la plataforma en la base de datos.
-			AppDataSource.manager.insert(Platform, platform)
+			return AppDataSource.manager.insert(Platform, platform)
 
 		})
 

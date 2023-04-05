@@ -1,21 +1,22 @@
 import { isDevMode } from '@angular/core';
-import { connectionError, writeEvent } from '../../../../src/interfaces/connection.interface';
-import { incommingConnection, inProgressConnection, minimalIdentify, processingConnection, successfulConnection, withTerminalData } from '../interfaces/pty.interface';
+import { connection, writeEvent, connectionError } from '../../../../src/interfaces/unifiedStructure.interface';
+import { stores } from '../data/store.data';
+import { terminalStore } from '../data/terminal.store';
+import { ConnectedWebTerminal, isConnectedWebTerm, WebTerminal } from '../interfaces/pty.interface';
 import { TerminalService } from '../services/terminal.service';
 import { WebsocketsService } from '../services/websockets.service';
 
 /**
  * Controla los eventos del servicio de terminales.
+ * Maneja la lógica de eventos.
  */
 export class TerminalEventsController {
-
-	private terms: TerminalService['terms'];
 
 	constructor(private terminals: TerminalService,
 				private socket: WebsocketsService) {
 
 		// Vincula la propiedad con la referencia del almacén de terminales.
-		this.terms = terminals.terms;
+		//this.terms = terminals.terms;
 		
 		// Escucha los eventos.
 		this.listenEvents();
@@ -31,18 +32,18 @@ export class TerminalEventsController {
 	private listenEvents() {
 
 		// Escucha el evento de inserción de datos provenientes de la terminal.
-		this.socket.once('terminals', this.onTerminals.bind(this));
+		this.socket.once('terminals', this.onceTerminals.bind(this));
 
 		// Escucha el evento de inserción de datos provenientes de la terminal.
 		this.socket.on('terminalData', this.onWriteHandler.bind(this));
 		
-		// Escucha el evento de inserción de datos provenientes de la terminal.
+		// Escucha el evento de actualización de estado de conexión para una terminal.
 		this.socket.on('connectionUpdate', this.onConnectionUpdate.bind(this));
 
 		// Escucha el evento de error de apertura de terminal.
 		this.socket.on('openTerminalError', this.onTerminalConnectionError.bind(this));
 		
-		// Escucha el evento de inserción de datos provenientes de la terminal.
+		// Escucha el evento de error de conexión a un servidor.
 		this.socket.on('terminalConnectionError', this.onTerminalConnectionError.bind(this));
 
 		// Escucha el evento de desconexión proveniente de la terminal.
@@ -51,11 +52,19 @@ export class TerminalEventsController {
 	}
 
 	// Carga en memoria las terminales provenientes del servidor.
-	private onTerminals(terms: successfulConnection[]) {
-		terms.forEach(term => {
-			if (term.history) term.history = this.replaceStrangeCharacters(term.history);
-			this.terminals.terms.push(term)
-		});
+	// En principio el almacén de terminales debería estar vacío.
+	// Este evento solo se dispara una sola vez desde la instanciación del controlador de eventos.
+	private onceTerminals(terms: connection[]) {
+
+		// Aparentemente el tipo de connection no es compatible con el connection de WebTerminal.
+		// No hay otra alternativa viable que hacer un casteo.
+
+		terms.forEach(con => {
+			const { history } = con;
+			const term = <WebTerminal>{ connection: { ...con, history: this.replaceStrangeCharacters(history) } }	
+			terminalStore.set(term.connection.pid, term);
+		})
+
 	};
 	
 
@@ -106,19 +115,24 @@ export class TerminalEventsController {
 
 	} */
 	
+	/**
+	 * Maneja el evento de entrada de terminal.
+	 * @param data Evento de escritura.
+	 */
 	private onWriteHandler(data: writeEvent) {
 
 		// Busca la terminal.
-		const terminal = this.terminals.findTerminal(data) as successfulConnection;
+		const terminal = this.terminals.findTerminal(data.pid);
 
-		// En zsh para macOS se producen caracteres extraños (en mi equipo).
-		data.data = this.replaceStrangeCharacters(data.data);
-
+		
 		// Comprueba si ha encontrado la terminal.
 		if (terminal) {
-
+			
 			// Comprueba si incluye una instancia de terminal.
 			if (terminal.terminal) {
+				
+				// En zsh para macOS se producen caracteres extraños (en mi equipo).
+				data.data = this.replaceStrangeCharacters(data.data);
 
 				// Inserta los datos.
 				terminal.terminal.write(data.data);
@@ -129,55 +143,37 @@ export class TerminalEventsController {
 				return;
 			}
 
-			if (!terminal.history) return terminal.history = data.data
-			else return terminal.history += data.data;
+			if (!terminal.connection.history) return terminal.connection.history = data.data
+			else return terminal.connection.history += data.data;
 
 		};
 
+		// No ha encontrado la terminal, la crea.
+
 		// Desestructura los datos del evento.
-		const { data: history, ...r } = data;
+		const { data: history,  ...r } = data;
 
 		// Crea una nueva terminal.
-		const newTerm: incommingConnection = { ...r, history, focus: false };
+		const newTerminal = {
+			connection: r, focus: false
+		} as WebTerminal;
 
 		// Inserta la terminal.
-		this.terms.push(newTerm);
+		this.terminals.store.set(r.pid, newTerminal);
 
 	}
 
 	/**
 	 * Maneja el evento de actualización de estado de conexión con el servidor.
 	 */
-	private onConnectionUpdate(data: inProgressConnection | successfulConnection) {
-		
-		// Busca la terminal
-		let terminal = this.terms.find(t => t.host === data.host && t.auth === data.auth) as (incommingConnection | processingConnection | successfulConnection);
-		const index = this.terms.findIndex(t => t.host === data.host && t.auth === data.auth);
+	private onConnectionUpdate(data: connection) {
 
-		/**
-		 * Esto se lanza varias veces.
-		 * En ocasiones, no es capaz de encontrar la terminal, por lo tanto crea una nueva.
-		 */
+		const term = this.terminals.store.get(data.pid);
 
-		// No se ha encontrado la terminal, se añade al array.
-		if (!terminal) {
-			return this.terms.push(data)
-		};
+		// TODO: Añadir comportamiento para cuando no exista la terminal en el almacén.
+		if (!term) return;
 
-		// Comprueba si existen datos de instancia de terminal.
-		if ('terminal' in terminal && 'element' in terminal) {
-
-			// Asigna a los datos de la respuesta 
-			data.terminal = terminal.terminal
-			data.element = terminal.element
-
-			// Asigna el foco si lo tiene
-			if (terminal.focus) data.focus = true;
-
-		}
-
-		// Reasigna los datos.
-		this.terms[index] = data;
+		term.connection = data;
 
 	}
 
@@ -186,34 +182,29 @@ export class TerminalEventsController {
 		// Inserta el error en el conjuto de errores.
 		this.terminals.connectionErrors.push(data);
 
-		// Busca el índice de la terminal.
-		const pty = this.terms.findIndex(pty => pty.host === data.host && pty.auth === data.auth);
-
-		// Si existe, la elimina.
-		if (pty >= 0) this.terms.splice(pty, 1);
+		this.terminals.store.delete(data.pid);
 
 		// Si no quedan más terminales, vuelve al menú principal.
-		if (this.terms.length < 1) this.terminals.router.navigate(['/main'])
+		if (this.terminals.store.reflectedTerminalStoreArray.length < 1) this.terminals.router.navigate(['/main'])
 
 	}
 
-	private onDisconnectHandler(data: minimalIdentify) {
+	private onDisconnectHandler(data: connection) {
 
-		const index = this.terms.findIndex((t: any) => t.auth === data.auth && t.host === data.host && t.pid === data.pid);
+		const term = this.terminals.store.get(data.pid);
 
-		if (index >= 0) {
-			
-			const terminal = this.terms[0] as successfulConnection;
+		if (!term) return;
 
-			if (terminal.terminal && terminal.element) {
-				terminal.terminal.dispose();
-				terminal.element = undefined as any;
-				terminal.terminal = undefined as any;
-			}
+		if (isConnectedWebTerm(term) && term.terminal) {
+				term.terminal.dispose();
+		}
 
-			this.terms.splice(index, 1);
-			
-			if (this.terms.length < 1) this.terminals.router.navigate(['/main']);
+		const deletion = this.terminals.store.delete(data.pid);
+		
+		if (this.terminals.store.reflectedTerminalStoreArray.length < 1) return this.terminals.router.navigate(['/main']);
+
+		if (deletion) {
+			this.terminals.store.reflectedTerminalStoreArray[0].focus = true;
 		}
 
 	}

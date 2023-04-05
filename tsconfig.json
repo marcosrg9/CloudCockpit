@@ -16,6 +16,7 @@
       "experimentalDecorators": true,
       "sourceMap": true,
       "esModuleInterop": true,
-      "noImplicitReturns": false
+      "noImplicitReturns": false,
+      "resolveJsonModule": true
    }
 }

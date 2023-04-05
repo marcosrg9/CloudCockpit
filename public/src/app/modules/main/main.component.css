@@ -25,3 +25,30 @@
 .servers > .card {
 	padding: 12px;
 }
+
+.commandPalette {
+	position: absolute;
+	z-index: 999;
+	left: 50%;
+	top: calc(50% - 200px);
+	transform: translate(-50%, 0%);
+}
+
+.commandPalette.visible {
+	animation-name: paletteVisible;
+	animation-timing-function: ease-out;
+	animation-fill-mode: forwards;
+	animation-duration: 0.17s;
+
+}
+
+@keyframes paletteVisible {
+	from {
+		transform: translateY(-20px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0px);
+		opacity: 1;
+	}
+}

@@ -1,0 +1,102 @@
+:host {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.cont {
+	background: var(--color-canvas-inset);
+	border-radius: 6px;
+	overflow: hidden;
+	width: 700px;
+}
+
+.input {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	padding: 10px 20px;
+}
+
+.input > input {
+	border: none;
+	background: transparent;
+	outline: none;
+	font-size: 1.7em;
+	margin-left: 10px;
+	width: 100%;
+}
+
+.results {
+	height: 0px;
+	width: 100%;
+	transition: ease-out 0.15s height;
+	box-sizing: border-box;
+}
+
+.results.collapse {
+	height: 300px;
+	border-top: 1px solid var(--color-border-default) !important;
+	padding: 5px;
+	overflow: scroll;
+	overflow-x: hidden;
+}
+
+.filtered_servers > div {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 5px;
+	box-sizing: border-box;
+	border-radius: 6px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.filtered_actions > .action {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 5px;
+	box-sizing: border-box;
+	border-radius: 6px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	cursor: pointer;
+}
+
+.action > .action_meta > .action_title {
+	font-size: 12pt;
+	font-weight: 500;
+}
+
+.filtered_actions > .action:hover,
+.filtered_servers > div:hover {
+	background: rgba(var(--personal-blue1_RGB),0.2);
+}
+
+.filtered_actions > .action:hover > .icon,
+.filtered_servers > div:hover > * {
+	color: rgba(var(--personal-blue1_RGB),1);
+	color: white;
+}
+
+.filtered_actions > .action:hover > .icon,
+.filtered_servers > div:hover > .icon {
+	background: rgba(var(--personal-blue1_RGB),0.2);
+	background: var(--personal-blue1);
+}
+
+.icon {
+	padding: 10px;
+	border-radius: 6px;
+	background: rgba(var(--foreground_RGB),0.02);
+}
+
+@media (max-width: 768px) {
+	.cont {
+		width: 90%;
+	}
+}

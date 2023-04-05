@@ -14,7 +14,7 @@ export abstract class ServersController {
 		server.owner = req.session.auth._id;
 
 		// Valida los parámetros del servidor.
-		const validation = serverValidator.validate(server);
+		const validation = serverValidator.validate(server, { stripUnknown: true, abortEarly: false });
 
 		// Si se ha producido un error de validación, se detiene la petición y se informa al usuario.
 		if (validation.error) return res.status(400).json(validation.error);

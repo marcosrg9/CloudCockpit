@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { userStore } from '../../database/stores/user.store';
-import { minimalIdentify } from '../../../public/src/app/interfaces/pty.interface';
+import { minimalIdentification } from '../../../public/src/app/interfaces/pty.interface';
 import { resizeEvent, writeEvent } from '../../interfaces/connection.interface';
 
 export class TerminalEvents {
@@ -49,18 +49,16 @@ export class TerminalEvents {
 		
 	}
 
-	private killTerminal(data: minimalIdentify) {
+	private killTerminal(data: minimalIdentification) {
+
+		if (!data.pid) return;
+
+		const user = userStore.get(this.user);
 		
-		if (data.auth && data.host) {
-			
-			const user = userStore.get(this.user);
-			
-			if (user) {
-				const terminal = user.getAllTerminals().get(data.pid);
+		if (user) {
+			const terminal = user.getAllTerminals().get(data.pid);
 
-				if (terminal) terminal.disconnect();
-			}
-
+			if (terminal) terminal.disconnect();
 		}
 
 	}

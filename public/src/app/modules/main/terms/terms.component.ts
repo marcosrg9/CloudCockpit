@@ -1,7 +1,7 @@
-import { AfterContentChecked, Component, HostListener, OnDestroy } from '@angular/core';
+import { AfterContentChecked, AfterContentInit, Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { WebTerminal } from 'src/app/interfaces/pty.interface';
 import { SeqParser } from 'src/app/models/sequenceParser.model';
-import { incommingConnection, pty, successfulConnection } from 'src/app/interfaces/pty.interface';
 import { ServersService } from 'src/app/services/servers.service';
 import { TerminalService } from 'src/app/services/terminal.service';
 
@@ -27,42 +27,53 @@ import { TerminalService } from 'src/app/services/terminal.service';
 	He realizado varias pruebas y esta es la forma más óptima.
 */
 
+// BUG: AfterContentChecked se ejecuta en cada detección de cambios. Error...
+
 @Component({
 	selector: 'app-terms',
 	templateUrl: './terms.component.html',
 	styleUrls: ['./terms.component.css', './xterm.theme.css'],
   })
-  export class TermsComponent implements AfterContentChecked, OnDestroy {
-
-	/** Define las pestañas de terminales. */
-	public tabs: incommingConnection | successfulConnection[] = [];
+  export class TermsComponent implements AfterContentInit, OnDestroy {
 
 	constructor(public terms: TerminalService,
 				public servers: ServersService,
 				public router: Router) {
 
 		// Navega al componente principal si no hay terminales pendientes de instanciación ni ya instanciadas.
-		if (terms.pending.length < 1 && terms.terms.length < 1) router.navigate(['/main'])
+		if (terms.store.reflectedWaitingTerminalStoreArray.length < 1 && terms.store.reflectedTerminalStoreArray.length < 1) router.navigate(['/main'])
 
 		// Asigna el foco automáticamente si solo hay una terminal.
-		if (this.terms.terms.length === 1) this.terms.terms[0].focus = true;
+		if (terms.store.reflectedTerminalStoreArray.length === 1) {
+			terms.store.reflectedTerminalStoreArray[0].focus = true;
+		}
+
+		if (terms.store.reflectedWaitingTerminalStoreArray.length > 0) {
+			terms.focus(terms.store.reflectedWaitingTerminalStoreArray[0].connection.pid)
+		}
+
+		if (!terms.getFocusedPty()) {
+			terms.store.reflectedTerminalStoreArray[0].focus = true;
+		}
+		
 	}
 
 	/**
 	 * Se ejecuta cuando se ha cargado la vista.
 	 * Este es el momento para insertar las terminales en el array.
 	 */
-	ngAfterContentChecked(): void {
-
-		// Comprueba si hay una instanciación pendiente.
+	ngAfterContentInit(): void {
+		/* // Comprueba si hay una instanciación pendiente.
 		if (this.terms.pending.length > 0) {
 
 			// Recorre las terminales pendientes de instanciar.
 			this.terms.pending.forEach((term, index) => {
-				this.terms.terms.push({ host: term.host, auth: term.auth, focus: true } as incommingConnection)
+
+				this.terms.store.set(term.connection.host)
+				this.terms.store.push({ host: term.host, auth: term.auth, focus: true } as incommingConnection)
 				this.terms.pending.splice(index, 1);
 			})
-		}
+		} */
 	}
 
 	/**

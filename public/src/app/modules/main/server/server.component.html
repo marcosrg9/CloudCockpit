@@ -2,9 +2,28 @@
 	
 	<div *ngIf="server">
 
+		<div class="manualLogin anim-fade-in Box" *ngIf="status.manualLogin">
+			
+			<div class="Box-header">
+				<h2 class="Box-title">Inicio de sesión manual</h2>
+				<p *ngIf="!server.auths || server.auths.length < 1" class="mb-0 text-small color-fg-subtle">El servidor {{ server.name }} no tiene credenciales almacenadas, introduce unas para iniciar sesión.</p>
+				<p *ngIf="server.auths && server.auths.length > 0" class="mb-0 text-small color-fg-subtle">Tienes varias credenciales asignadas a este servidor, selecciona una para conectarte.</p>
+			</div>
+
+			<div class="Box-row d-flex flex-items-center flex-column">
+				<input #manualUser placeholder="Usuario" type="text" class="form-control mb-2">
+				<input #manualPass placeholder="Contraseña" type="password" class="form-control">
+			</div>
+
+			<div class="Box-footer">
+				<button (click)="manualLogin()" type="button" class="btn btn-block btn-outline" name="button">Iniciar sesión</button>
+			</div>
+
+		</div>
+
 		<!-- Selector de credenciales -->
 		<div class="authSelector anim-fade-in Box" *ngIf="status.showSelector">
-
+			
 			<div class="Box-header">
 				<h2 class="Box-title">Selecciona un usuario</h2>
 				<p class="mb-0 text-small color-fg-subtle">Tienes varias credenciales asignadas a este servidor, selecciona una para conectarte.</p>
@@ -19,9 +38,10 @@
 					<button (click)="openTerminal(credential._id)" type="button" class="btn btn-primary btn-sm" name="button">Conectar</button>
 				</div>
 			</div>
-			
+
+			<!-- Botón de cerrar. -->
 			<div class="Box-footer">
-				<button (click)="status.showSelector = false" type="button" class="btn btn-block" name="button">Cancelar</button>
+				<button (click)="status.showSelector = false" type="button" class="btn btn-block" name="button">Cerrar</button>
 			</div>
 
 		</div>
@@ -68,7 +88,7 @@
 					<svg class="octicon octicon-clippy mr-3" viewBox="0 0 24 24" width="24" height="24"><path d="M9.25 12a.75.75 0 01-.22.53l-2.75 2.75a.75.75 0 01-1.06-1.06L7.44 12 5.22 9.78a.75.75 0 111.06-1.06l2.75 2.75c.141.14.22.331.22.53zm2 2a.75.75 0 000 1.5h5a.75.75 0 000-1.5h-5z"></path><path fill-rule="evenodd" d="M0 4.75C0 3.784.784 3 1.75 3h20.5c.966 0 1.75.784 1.75 1.75v14.5A1.75 1.75 0 0122.25 21H1.75A1.75 1.75 0 010 19.25V4.75zm1.75-.25a.25.25 0 00-.25.25v14.5c0 .138.112.25.25.25h20.5a.25.25 0 00.25-.25V4.75a.25.25 0 00-.25-.25H1.75z"></path></svg>
 					<div class="flex-auto flex-column Truncate">
 						<h3 class="Box-title overflow-hidden flex-auto Truncate-text">Terminal SSH
-							<span *ngIf="openedPtys.length > 0" class="Counter ml-1" style="padding: 0px 8px">{{ openedPtys.length }}</span> </h3>
+							<span *ngIf="terminals.length > 0" class="Counter ml-1" style="padding: 0px 8px">{{ terminals.length }}</span> </h3>
 						<div class="text-small color-fg-subtle">Abre una nueva sesión.</div>
 					</div>
 				</div>
@@ -80,7 +100,7 @@
 					<svg class="octicon octicon-clippy mr-3" viewBox="0 0 24 24" width="24" height="24"><path d="M9.25 12a.75.75 0 01-.22.53l-2.75 2.75a.75.75 0 01-1.06-1.06L7.44 12 5.22 9.78a.75.75 0 111.06-1.06l2.75 2.75c.141.14.22.331.22.53zm2 2a.75.75 0 000 1.5h5a.75.75 0 000-1.5h-5z"></path><path fill-rule="evenodd" d="M0 4.75C0 3.784.784 3 1.75 3h20.5c.966 0 1.75.784 1.75 1.75v14.5A1.75 1.75 0 0122.25 21H1.75A1.75 1.75 0 010 19.25V4.75zm1.75-.25a.25.25 0 00-.25.25v14.5c0 .138.112.25.25.25h20.5a.25.25 0 00.25-.25V4.75a.25.25 0 00-.25-.25H1.75z"></path></svg>
 					<div class="flex-auto flex-column Truncate">
 						<h3 class="Box-title overflow-hidden flex-auto Truncate-text">Terminal
-							<span *ngIf="openedPtys.length > 0" class="Counter ml-1" style="padding: 0px 8px">{{ openedPtys.length }}</span> </h3>
+							<span *ngIf="terminals.length > 0" class="Counter ml-1" style="padding: 0px 8px">{{ terminals.length }}</span> </h3>
 						<!-- <div class="text-small color-fg-subtle">SSH</div> -->
 					</div>
 				</div>

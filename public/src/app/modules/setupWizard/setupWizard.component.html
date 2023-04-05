@@ -6,7 +6,7 @@
 		</div>
 		<p class="color-fg-subtle" *ngIf="!status.cypherKey">Bienvenido a CloudCockpit, este asistente de inicialización te ayudará a poner en marcha el servidor por primera vez.</p>
 		<p class="color-fg-subtle" *ngIf="status.cypherKey">Se ha detectado una clave válida para el sistema de cifrado de datos y puede continuar con la configuración.</p>
-		<!-- <p class="color-fg-subtle anim-fade-in" style="opacity: 0; animation-delay: 5s; animation-fill-mode: forwards;">Esto puede tomar unos minutos...</p> -->
+		<p class="color-fg-subtle anim-fade-in" style="opacity: 0; animation-delay: 5s; animation-fill-mode: forwards;">Esto puede tomar unos minutos...</p>
 		<button class="btn btn-outline mt-3" *ngIf="!status.cypherKey" routerLink="encrypt">Comenzar</button>
 		<button class="btn btn-outline mt-3" *ngIf="status.cypherKey" routerLink="admin">Continuar</button>
 	</div>

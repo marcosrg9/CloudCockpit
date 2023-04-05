@@ -1,5 +1,13 @@
 const { cpus, totalmem } = require('os');
 
+console.log(`
+Iniciando pruebas de rendimiento.
+Velocidad de lectura y acceso a estructuras de datos.
+	- Arrays.
+	- Objetos.
+	- Mapas (hash).
+`)
+
 console.log('\nProcesadores:')
 
 // Muestra los procesadores.
@@ -43,19 +51,23 @@ array.forEach((va, index) => {
 	map.set(index, va);
 	object[index] = va;
 })
-
+console.log('Rellenado de datos');
 console.timeEnd('Data fill');
 
-// Conteo de tiempo de procesamiento para recorrer el array.
+// Conteo de tiempo de procesamiento para recorrer el array (en el peor de los casos).
+console.log('\nRecorrido de array en el peor de los casos (última posición)');
 console.time('Array'); for (let i = 0; i < array.length; i++) { }; console.timeEnd('Array');
 
-// Conteo de tiempo de procesamiento de búsqueda directa por índice.
+// Conteo de tiempo de procesamiento de acceso a índice objecto.
+console.log('\nAcceso a índice de array.');
 console.time('Array by index'); array[n - 1]; console.timeEnd('Array by index');
 
-// Conteo de tiempo de procesamiento de búsqueda directa por índice.
+// Conteo de tiempo de procesamiento de acceso a índice de objeto.
+console.log('\nAcceso a propiedad de objeto.');
 console.time('Object by index'); object[n - 1]; console.timeEnd('Object by index');
 
-// Conteo de tiempo de procesamiento de búsqueda directa por hash.
+// Conteo de tiempo de procesamiento de acceso a registro por hash.
+console.log('\nAcceso a hash de mapa.');
 console.time('Map'); map.get(n - 1); console.timeEnd('Map');
 
 // Bytes / Kilobytes / Megabytes / Gigabytes.

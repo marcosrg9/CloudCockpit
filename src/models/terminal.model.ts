@@ -1,24 +1,24 @@
-import { terminalSizeParamsValidator } from '../validators/terminal.validator';
-import { sizeParams, SshClient } from './ssh.model';
 import { randomUUID } from 'crypto';
 import { ClientChannel } from 'ssh2';
+import { sizeParams, SshClient } from './ssh.model';
 import { User } from './user.model';
+import { terminalSizeParamsValidator } from '../validators/terminal.validator';
 import { writeEvent } from '../interfaces/connection.interface';
-import { userStore } from '../database/stores/user.store';
+import { connection } from '../interfaces/unifiedStructure.interface';
 
 export class Terminal {
 
 	/** Instancia de la conexión al servidor. */
 	public connection: SshClient;
 
-	/** Identificador de proceso de la terminal. */
+	/** Identificador de conexión. */
 	public readonly pid: string = randomUUID();
 
 	/** Instancia del flujo de datos. */
 	private stream: ClientChannel;
 
 	/** Estado actual de la conexión. */
-	private _status: 'connecting' | 'connected';
+	private _status: connection['status'] = 'waiting';
 
 	/** Fecha en la que se abrió la conexión. */
 	private _at = new Date();
@@ -47,7 +47,10 @@ export class Terminal {
 				public readonly authId: string,
 				public readonly username: string,
 				public readonly password: string,
-				public readonly sizeParams: sizeParams) {
+				public readonly sizeParams?: sizeParams) {
+
+		// Comprueba si los parámetros de dimesiones no han sido establecidos y asigna los predefinidos.
+		if (!sizeParams) sizeParams = { cols: '80', rows: '120', height: '300', width: '200' };
 
 		// Valida los datos de dimensiones.			
 		const validate = terminalSizeParamsValidator.validate(sizeParams, { stripUnknown: true });
@@ -73,8 +76,13 @@ export class Terminal {
 	 */
 	public connect() {
 
+		if (this._status == 'connected') return;
+
 		// Declara el estado.
 		this._status = 'connecting';
+
+		// Elimina del conjunto de espera.
+		this.user.termStore.removeFromWaitings(this.pid);
 
 		// Intenta conectarse al servidor SSH.
 		return this.connection.connect()
@@ -89,12 +97,19 @@ export class Terminal {
 			// Declara el estado.
 			this._status = 'connected';
 
+			// Añade la terminal al mapa.
+			this.user.termStore.set(this.pid, this);
+
 			// Devuelve una promesa resuelta.
 			return Promise.resolve(this.pid);
 
 		})
+		// Catch no es necesario, se captura el evento de cierre y error.
 	}
 
+	/**
+	 * Desconecta y cierra el flujo.
+	 */
 	public disconnect() {
 		this.connection.close();
 	}
@@ -106,6 +121,10 @@ export class Terminal {
 		this.connection.write(data)
 	};
 
+	/**
+	 * Cambia las dimensiones de la terminal.
+	 * @param data Parámetros de dimensiones.
+	 */
 	public resize(data: sizeParams) { this.connection.resize(data) };
 
 	/**
@@ -162,6 +181,10 @@ export class Terminal {
 		}
 	}
 
+	/**
+	 * Maneja el evento de error de conexión.
+	 * @param error Error producido
+	 */
 	private onError(error: Error) {
 		this.user.broadcast('terminalConnectionError', {
 			host: this.server,
@@ -174,7 +197,9 @@ export class Terminal {
 	/**
 	 * Maneja el evento de cierre del flujo.
 	 */
-	private onceClose() { this.onceExit() }
+	private onceClose() {
+		this.onceExit()
+	}
 
 	/**
 	 * Emite el evento de salida de la terminal.
@@ -192,6 +217,7 @@ export class Terminal {
 		// Destruye la conexión.
 		this.connection.close();
 		
+		// Elimina la terminal del almacén.
 		this.user.getAllTerminals().delete(this.pid);
 
 	}

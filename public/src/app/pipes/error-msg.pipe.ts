@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { connectionError } from '../../../../src/interfaces/unifiedStructure.interface';
 import { ServersService } from '../services/servers.service';
-import { connectionError } from '../../../../src/interfaces/connection.interface'
 
 @Pipe({
   name: 'errorMsg'

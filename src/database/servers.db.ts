@@ -90,10 +90,13 @@ class ServersManager extends AbstractDataManagerById<Server> {
 
 
 			// Busca un duplicado
-			const search = await AppDataSource.manager.findOneBy(Server, { host: validation.value.host });
+			const search = await AppDataSource.manager.findOneBy(Server, {
+				host: validation.value.host,
+				port: validation.value.port
+			});
 
 			// Comprueba si la dirección y el puerto coinciden.
-			if (search.host && search.port === validation.value.port) return Promise.reject('Server exists');
+			if (search && search.host && search.host === validation.value.host && search.port && search.port === validation.value.port) return Promise.reject('Server exists');
 			
 			// Crea una nueva instancia de servidor.
 			const server = new Server();
@@ -105,14 +108,14 @@ class ServersManager extends AbstractDataManagerById<Server> {
 			return AppDataSource.manager.insert(Server, server)
 			.then(() => {
 
-				const user = userStore.get(validation.value.id.toString());
-
 				// Emite un evento de nuevo servidor.
-				userStore.get(validation.value.id.toString()).broadcast('newServer');
+				userStore.get(validation.value.owner).broadcast('newServer');
 
 			})
 			
-		} catch (error) { Promise.reject(error) };
+		} catch (error) {
+			return Promise.reject(error)
+		};
 
 	}
 
@@ -127,7 +130,7 @@ class ServersManager extends AbstractDataManagerById<Server> {
 			const uid = new ObjectId(id)
 	
 			return AppDataSource.manager.find(Server, {
-				where: {owner: [uid]}
+				where: {owner: uid}
 			})
 
 		} catch (error) {

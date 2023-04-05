@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
+import { serverStore } from '../data/servers.data';
 import { server } from '../interfaces/server.interface';
-import { ServerModule } from '../modules/main/server/server.module';
 import { WebsocketsService } from './websockets.service';
 
 
@@ -9,7 +9,10 @@ import { WebsocketsService } from './websockets.service';
 })
 export class ServersService {
 
-  public servers: server[] | null;
+  public store = serverStore;
+  private _fetchedServers = false;
+
+  //public servers: server[] | null;
 
   constructor(private socket: WebsocketsService) {
 
@@ -20,7 +23,10 @@ export class ServersService {
 
   public listenGlobalEvents() {
 
-    this.socket.on('serverData', (data: server[]) => { this.servers = data })
+    this.socket.on('serverData', (data: server[]) => {
+      this.store.servers = data;
+      if (!this.fetchedServers) this._fetchedServers = true;
+    })
     this.socket.on('newServer', () => { this.fetchAllServers() })
 
   }
@@ -58,6 +64,17 @@ export class ServersService {
    * Limpia la lista de servidores.
    */
   public cleanUp() {
-    this.servers = null;
+    this.store.servers = [];
+    this._fetchedServers = false;
+
+    this.socket.removeAllListeners('serverData');
+    this.socket.removeAllListeners('newServer');
   }
+
+  // Getter y setter que enlazan con el almacén.
+  get servers() { return this.store.servers }
+  set servers(servers: server[]) { this.store.servers = servers }
+
+  get fetchedServers() { return this._fetchedServers };
+
 }

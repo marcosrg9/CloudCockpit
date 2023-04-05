@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { completePty, pty, successfulConnection, terminalType } from '../../interfaces/pty.interface';
+import { WebTerminal } from '../../interfaces/pty.interface';
 
 @Pipe({
   name: 'filterPtys',
@@ -9,15 +9,15 @@ export class FilterPtysPipe implements PipeTransform {
 
   constructor() { }
 
-  withPids(value: successfulConnection[]): successfulConnection[] {
+  withPids(value: WebTerminal[]): WebTerminal[] {
 
-    return value.filter(t => t.pid);
+    return value.filter(v => v.connection.pid);
     
   }
   
-  withoutPids(value: terminalType[]): any[] {
+  withoutPids(value: WebTerminal[]): WebTerminal[] {
     
-    return value.filter(pty => 'pid' !in pty);
+    return value.filter(t => !t.connection.pid);
     
   }
   
@@ -26,18 +26,18 @@ export class FilterPtysPipe implements PipeTransform {
    * @param value Array de terminales.
    * @param havePid True - Las terminales devueltas tienen pid.
    */
-  transform(value: terminalType[], havePid?: true): successfulConnection[];
 
   /**
    * Filtra las terminales que no tengan pids.
    * @param value Array de terminales.
    * @param havePid False - Las terminales devueltas no tienen pid.
    */
-  transform(value: terminalType[], havePid: false): terminalType[];
-  transform(value: successfulConnection[], havePid: boolean = true): successfulConnection[]  {
-    
+  //transform(value: ttyStore, havePid: false): terminalType[];
+  transform(value: WebTerminal[], havePid: boolean = true): WebTerminal[]  {
+
     if (havePid) return this.withPids(value)
-    else return this.withoutPids(value);
+    else return this.withPids(value)
+    
     
   }
 

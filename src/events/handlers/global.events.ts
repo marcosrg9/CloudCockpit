@@ -1,12 +1,16 @@
 import { Session, SessionData } from 'express-session';
 import { Socket } from 'socket.io';
+import { terminalStore } from '../../../public/src/app/data/terminal.store';
+import { minimalIdentification } from '../../../public/src/app/interfaces/pty.interface';
 import { auths } from '../../database/auth.db';
 import { servers } from '../../database/servers.db';
 import { sessionStore } from '../../database/stores/session.store';
 import { socketStore } from '../../database/stores/socket.store';
 import { userStore } from '../../database/stores/user.store';
-import { newConnection, successfulConnection } from '../../interfaces/connection.interface';
-import { TerminalEvents } from './terminal.events';
+import { users } from '../../database/user.db';
+import { newConnection } from '../../interfaces/connection.interface';
+import { connection, openConnection } from '../../interfaces/unifiedStructure.interface';
+import { logger } from '../../models/logger.model';
 
 export class GlobalEvents {
 
@@ -17,7 +21,7 @@ export class GlobalEvents {
 	 * Controla los eventos globales de la plataforma.
 	 * @param socket Instancia del socket del usuario.
 	 */
-	
+
 	constructor(private socket: Socket) {
 
 		// Asigna la sesión del usuario a la propiedad.
@@ -28,9 +32,15 @@ export class GlobalEvents {
 
 		// Maneja el evento de obtención de terminales.
 		this.socket.on('getTerminals', this.onGetTerminals.bind(this))
+
+		// Maneja el evento de petición de datos de terminal.
+		this.socket.on('getTerminal', this.onGetTerminal.bind(this));
 		
-		// Evento de petición de lista de servidores.
+		// Evento de petición de conexión SSH.
 		this.socket.on('newTerminal', this.onNewTerminal.bind(this));
+
+		// Evento de solicitud de incialización de conexión.
+		this.socket.on('prepareTerminal', this.onPrepare.bind(this));
 		
 		// Evento de desconexión de usuario.
 		this.socket.on('disconnect', this.disconnect.bind(this));
@@ -40,6 +50,7 @@ export class GlobalEvents {
 	/**
 	 * Obtiene una lista de servidores.
 	 */
+	// TODO: Basura por todos lados. Y si cambiamos de mongo a SQLite??
 	private onGetServers() {
 
 		servers.getServersOfUser(this.session.auth._id)
@@ -53,6 +64,7 @@ export class GlobalEvents {
 			// Genera un array de promesas de consultas personalizadas.
 			const query = servers.flatMap(server => {
 
+				if (server.auths.length < 1) serverMap.set(server._id, server);
 				return server.auths.map(auth => {
 
 					// Modifica la respuesta de la promesa.
@@ -120,23 +132,20 @@ export class GlobalEvents {
 
 		if (user) {
 
-			const terminals: successfulConnection[] = [];
+			const terminals: connection[] = [];
 			
 			user.getAllTerminals().forEach(term => {
 
 				// Desestructura el objeto para que el resto sea la información válida.
-				const { status, authId, serverId, pid, at, buffer , server, username, port } = term;
+				const { status, authId: auth, serverId: host, pid, at, buffer: history, server, username: user, port } = term;
+
+				// 
+				const data: connection = {
+					status, auth, host, pid, at, history, resolved: { host: server, user, port: port.toString() }
+				}
 
 				// Inserta el resto en el array de terminales.
-				terminals.push({
-					status,
-					auth: authId,
-					host: serverId,
-					pid,
-					at,
-					history: buffer,
-					resolved: { host: server, user: username, port: port.toString() }
-				} as successfulConnection)
+				terminals.push(data);
 
 			});
 
@@ -148,32 +157,85 @@ export class GlobalEvents {
 	
 	}
 
-	private onNewTerminal(data: newConnection) {
+	private onGetTerminal(data: minimalIdentification) {
+
+		if (!data.auth || !data.host) this.socket.emit('requestError', { code: 'missing_required_data' });
+
+		const user = userStore.get(this.session.auth._id);
+
+		if (!user) {
+			// TODO: Handle disconnection.
+		}
+		
+		//@ts-ignore
+		for (let [i, term] of Array.from(user.getAllTerminals())) {
+			const { serverId, authId, pid, server, username, port, status } = term;
+
+			if (serverId === data.host && authId === data.auth && pid === data.pid) {
+				this.socket.emit('terminalData', {
+					auth: authId,
+					host: serverId,
+					pid: pid,
+					status,
+					resolved: { host: server, user: username, port }
+				} as connection)
+				
+				break;
+			};
+
+		}
+		
+	}
+
+	private onPrepare(data: minimalIdentification) {
 
 		// Busca la instancia del usuario.
 		const user = userStore.get(this.session.auth._id);
 
-		// Si ha encontrado al usuario, realiza las acciones.
-		if (user) {
+		// Si el usuario no ha sido encontrado o no hay sesiones, desconecta inmediatamente el socket.
+		if (!user || user.getAllSessions().length === 0) return this.disconnect('User not exists.');
 
-			// Si no hay sesiones, se detiene.
-			if (user.getAllSessions().length === 0) return;
+		// Prepara la terminal.
+		user.prepareTerminal(data.host, data.auth)
+		.then(terminal => {
+			// Emite al socket el identificador de terminal.
+			this.socket.emit('preparedTerminal', terminal);
+		})
+		.catch(err => {
+			this.socket.emit('prepareTerminalError', err);
+			logger.error('GlobalWebSocketEvent', err)
 
-			// Crea una nueva terminal.
-			user.openTerminal(data.host, data.auth, data.size);
+		})
+
+	}
+
+ 	private onNewTerminal(data: openConnection) {
+
+		// Busca la instancia del usuario.
+		const user = userStore.get(this.session.auth._id);
+
+		// Desconecta el socket si no ha encontrado al usuario.
+		if (!user) this.disconnect('User not exists.');
+
+		// Si no hay sesiones, se detiene.
+		if (user.getAllSessions().length === 0) return;
+
+		// Crea una nueva terminal.
+		user.openTerminal(data.pid, data.size)
+		.then(() => {
 
 			// Obtiene todas las sesiones vinculadas al usuario y las recorre.
 			user.getAllSessions().forEach(sid => {
-
+	
 				// Busca la sesión del usuario de la iteración.
 				const session = sessionStore.getRecord(sid);
-
+	
 				// Si no encuentra la sesión, la elimina y se detiene.
 				if (!session) return user.removeSession(sid);
-
+	
 				// Recorre el conjunto de sockets.
 				session.sockets.forEach(id => {
-
+	
 					// Busca el socket.
 					const socket = socketStore.get(id);
 	
@@ -182,13 +244,13 @@ export class GlobalEvents {
 	
 					// Carga los eventos de terminal.
 					socket.loadTerminalEvents();
-
+	
 				})
-
-
+	
 			})
 
-		} else this.disconnect('User not exists.');
+		})
+
 
 	}
 

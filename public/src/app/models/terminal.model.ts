@@ -51,5 +51,7 @@ export class Terminal extends xterm {
 
 		// Carga el addon de enlaces.
 		this.loadAddon(this.linksAddon);
+
+		this.fitAddon.activate(this);
 	}
 }

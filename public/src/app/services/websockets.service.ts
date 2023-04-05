@@ -1,6 +1,6 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Socket, SocketIoConfig } from 'ngx-socket-io';
-import { Subject } from 'rxjs';
+import { stores } from '../data/store.data';
 import { ServersService } from './servers.service';
 
 @Injectable({
@@ -8,7 +8,7 @@ import { ServersService } from './servers.service';
 })
 export class WebsocketsService {
 
-  public socket: Socket = new Socket({ url: location.host, options: { autoConnect: false } });
+  public socket: Socket = new Socket({ url: location.host, options: { autoConnect: false }});
 
   private pending: { event: string, args: any }[] = [];
 
@@ -19,6 +19,8 @@ export class WebsocketsService {
   constructor() {
 
     this.connected = this.socket.ioSocket.connected;
+
+    stores.socket = this;
 
     this.socket.on('connect', this.onConnect.bind(this));
 
@@ -68,6 +70,24 @@ export class WebsocketsService {
     if (!this.connected) {
       this.connecting = true;
       this.socket.connect();
+
+      // Escucha el evento de conexión.
+      this.socket.once('connect', () => {
+        this.connecting = false;
+        this.socket.removeAllListeners('connect_error');
+      })
+      
+      // Escucha el evento de error de conexión
+      this.socket.once('connect_error', () => {
+        this.connecting = false;
+        ['connect', 'disconnect'].forEach((e) => this.socket.removeAllListeners(e));
+      })
+      
+      // Escucha el evento de desconexión.
+      this.socket.once('disconnect', (reason: string) => {
+        this.connecting = false;
+        ['connect', 'connect_error'].forEach((e) => this.socket.removeAllListeners(e));
+      })
     }
   }
 

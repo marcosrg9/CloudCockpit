@@ -9,7 +9,8 @@ export class PlatformRouter {
 	constructor() {
 
 		this.router.use('/platform', [
-			this.router.get('/gpip', [ AuthMiddlewares.rejectIfNotLoggedIn ], PlatformController.getPublicIP)
+			this.router.get('/gpip', [ AuthMiddlewares.rejectIfNotLoggedIn ], PlatformController.getPublicIP),
+			this.router.get('/getplatformdigest', [ AuthMiddlewares.rejectIfNotLoggedIn ], PlatformController.getPlatformDigest),
 		])
 
 	}

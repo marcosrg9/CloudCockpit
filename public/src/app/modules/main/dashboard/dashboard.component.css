@@ -7,3 +7,9 @@
 .servers > div > .Box {
 	width: 100%;
 }
+
+#serverSpinner {
+	opacity: 0;
+	animation-delay: 2s;
+	animation-fill-mode: forwards;
+}
