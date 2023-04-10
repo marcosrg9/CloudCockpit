@@ -413,6 +413,8 @@ export class TerminalService implements OnDestroy {
 		
 		this.store.clear();
 
+		this.connectionErrors = [];
+
 		this.eventController = undefined as any;
 
 	}

@@ -155,7 +155,7 @@ export class TerminalEventsController {
 
 		// Crea una nueva terminal.
 		const newTerminal = {
-			connection: r, focus: false
+			connection: { ...r, status: 'connected' }, focus: false
 		} as WebTerminal;
 
 		// Inserta la terminal.

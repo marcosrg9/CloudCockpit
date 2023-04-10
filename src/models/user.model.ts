@@ -13,10 +13,12 @@ import { logger } from './logger.model';
 import { sizeParams } from './ssh.model';
 import { Terminal } from './terminal.model';
 
+type broadcastChannel = 'terminalData' | 'terminalExit' | 'connectionUpdate' | 'openTerminalError' | 'terminalConnectionError' | 'newServer';
+
 export class User {
 
 	/** Almacena los id de sesiones. */
-	private sessions: 	string[] = [];
+	private sessions: 	Set<string> = new Set();
 
 	/** Almacena las terminales. */
 	public termStore: TerminalStore;
@@ -49,7 +51,7 @@ export class User {
 	 * @param message Mensaje.
 	 */
 	// BUG: Identificadores de datos repetidos en el almacén. Salida duplicada en el cliente.
-	public broadcast(channel: string, ...message: any) {
+	public broadcast(channel: broadcastChannel, ...message: any) {
 
 		// Recorre todas las sesiones.
 		this.sessions.forEach(id => {
@@ -185,6 +187,19 @@ export class User {
 		.catch(err => {
 			logger.error('terminal', err)
 			console.warn(err)
+
+			this.broadcast('terminalConnectionError', {
+				status: 'error',
+				at: term.at,
+				host: serverId,
+				auth: authId,
+				error: err,
+				pid: term.pid,
+				resolved: { host: server, user: username, port: port.toString() }
+			} as connectionError);
+
+			this.termStore.delete(pid);
+			
 		})
 
 	}
@@ -194,21 +209,31 @@ export class User {
 	/**
 	 * Devuelve todas las sesiones de los dispositivos conectados con esta cuenta.
 	 */
-	public getAllSessions() { return this.sessions };
+	public getAllSessions() { return Array.from(this.sessions) };
 
 	/**
 	 * Añade un nuevo identificador de sesión al usuario conectado.
 	 * @param id Identificador de la sesión.
 	 */
-	public appendSession(id: string) { this.sessions.push(id) }
+	public appendSession(id: string) {
+
+		// Busca el índice en el almacén.
+		const exists = this.sessions.has(id);
+
+		// Añade el identificador si no lo encuentra.
+		if (!exists) return this.sessions.add(id);
+
+		logger.warning('sessionStore', `Duplicated identifier ${id}.`)
+	}
 
 	public removeSession(id: string) {
 
-		// Busca el índice.
-		const index = this.sessions.indexOf(id);
-
-		// Elimina la sesión.
-		if (index !== -1) this.sessions.splice(index, 1);
+		// Intenta eliminar el identificador.
+		const exists = this.sessions.delete(id);
+		
+		// Añade un registro al log.
+		if (exists) logger.info('sessionStore', `Deleted identifier ${id}.`)
+		else logger.warning('sessionStore', `Trying to delete identifier that not exists ${id}.`);
 
 	}
 
