@@ -55,8 +55,6 @@ export class ClientSocket {
 		// Si la sesión no existe, se cierra la conexión.
 		if (!session) return this.socket.disconnect(true);
 		// Si existe, se enlaza el socket con la sesión.
-		// TODO: Adjunta el socket si existe la sesión, pero después lo añade al almacén.
-		// TODO: Comprobar si el duplicado de salida proviene de aquí.
 		else session.attachSocket(this.socket.id);
 
 		// Instancia los controladores de eventos.
@@ -74,7 +72,6 @@ export class ClientSocket {
 
 		if (process.env.NODE_ENV === 'dev' || process.env.FORCE_DEV === 'true') {
 			this.developer = new DeveloperEvents(this.socket);
-			console.log(`${new Date().toISOString()} – ⚠️ Eventos de desarrollador cargados.`);
 		}
 
 		// Se almacena este socket en el almacén.
@@ -118,6 +115,8 @@ export class ClientSocket {
 		
 		this.global.removeAllListeners();
 		if (this.terminal) this.terminal.removeAllListeners();
+		if (this.admin) this.admin.removeAllListeners();
+		if (this.developer) this.developer.removeAllListeners();
 
 	}
 

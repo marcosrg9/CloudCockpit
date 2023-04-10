@@ -1,18 +1,16 @@
 import { Session, SessionData } from 'express-session';
 import { Socket } from 'socket.io';
-import { terminalStore } from '../../../public/src/app/data/terminal.store';
 import { minimalIdentification } from '../../../public/src/app/interfaces/pty.interface';
 import { auths } from '../../database/auth.db';
 import { servers } from '../../database/servers.db';
 import { sessionStore } from '../../database/stores/session.store';
 import { socketStore } from '../../database/stores/socket.store';
 import { userStore } from '../../database/stores/user.store';
-import { users } from '../../database/user.db';
-import { newConnection } from '../../interfaces/connection.interface';
 import { connection, openConnection } from '../../interfaces/unifiedStructure.interface';
 import { logger } from '../../models/logger.model';
+import { AbstractSocket } from '../abstractSocket.events';
 
-export class GlobalEvents {
+export class GlobalEvents extends AbstractSocket {
 
 	/** Sesión del cliente. */
 	private session: SessionData & Partial<Session>;
@@ -23,6 +21,8 @@ export class GlobalEvents {
 	 */
 
 	constructor(private socket: Socket) {
+
+		super(socket, ['getServers', 'getTerminals', 'getTerminal', 'newTerminal', 'prepareTerminal', 'disconnect'])
 
 		// Asigna la sesión del usuario a la propiedad.
 		this.session = this.socket.handshake.session;
@@ -100,6 +100,8 @@ export class GlobalEvents {
 
 						}
 
+					} else {
+						logger.warning('WebSocket', r.reason.name)
 					}
 
 				})
@@ -272,11 +274,5 @@ export class GlobalEvents {
 		if (session) session.removeSocket(this.socket.id);
 
 	}
-
-	public removeAllListeners() {
-
-		this.socket.removeAllListeners('getServers');
-		this.socket.removeAllListeners('disconnect');
-
-	}
+	
 }

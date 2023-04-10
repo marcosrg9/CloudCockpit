@@ -2,8 +2,9 @@ import { Socket } from 'socket.io';
 import { userStore } from '../../database/stores/user.store';
 import { minimalIdentification } from '../../../public/src/app/interfaces/pty.interface';
 import { resizeEvent, writeEvent } from '../../interfaces/connection.interface';
+import { AbstractSocket } from '../abstractSocket.events';
 
-export class TerminalEvents {
+export class TerminalEvents extends AbstractSocket {
 
 	private user: string;
 
@@ -14,6 +15,7 @@ export class TerminalEvents {
 	 * */
 	constructor(private socket: Socket) {
 
+		super(socket, ['writeToTerm', 'resize', 'killTerminal']);
 		this.user = socket.handshake.session.auth._id;
 
 		this.listenEvents();
@@ -60,14 +62,6 @@ export class TerminalEvents {
 
 			if (terminal) terminal.disconnect();
 		}
-
-	}
-
-	public removeAllListeners() {
-
-		this.socket.removeAllListeners('writeToTerm');
-		this.socket.removeAllListeners('resize');
-		this.socket.removeAllListeners('killTerminal');
 
 	}
 

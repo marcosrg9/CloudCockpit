@@ -2,10 +2,15 @@ import { Socket } from 'socket.io';
 import { sessionStore } from '../../database/stores/session.store';
 import { socketStore } from '../../database/stores/socket.store';
 import { userStore } from '../../database/stores/user.store';
+import { AbstractSocket } from '../abstractSocket.events';
 
-export class DeveloperEvents {
+export class DeveloperEvents extends AbstractSocket {
 
 	constructor(private socket: Socket) {
+
+		super(socket, ['dump:stores']);
+
+		//console.log(`${new Date().toISOString()} – ⚠️ Eventos de desarrollador cargados.`);
 
 		// Vuelca los almacenes.
 		this.socket.on('dump:stores', this.dump.bind(this));

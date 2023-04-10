@@ -1,8 +1,9 @@
 import { Socket } from 'socket.io';
 import { sessionStore } from '../../database/stores/session.store';
 import { socketStore } from '../../database/stores/socket.store';
+import { AbstractSocket } from '../abstractSocket.events';
 
-export class AdminEvents {
+export class AdminEvents extends AbstractSocket {
 
 	/**
 	 * Carga los eventos para usuarios administradores.
@@ -10,8 +11,9 @@ export class AdminEvents {
 	 */
 	constructor(private socket: Socket) {
 
-		// Comprueba que el usuario sea administrador.
-		if (socket.handshake.session.auth.role === 'admin') this.loadAdminEvents();
+		super(socket, ['getSockets', 'getSessions']);
+		
+		this.loadAdminEvents();
 
 	}
 
