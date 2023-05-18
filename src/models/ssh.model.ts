@@ -43,16 +43,17 @@ export class SshClient {
 					// Abre la terminal.
 					this.connection.shell((err, stream) => {
 
+						// Si se produce un error, rechaza la promesa.
+						if (err) reject(err);
+
 						// Establece los datos de dimensiones si existes.
 						if (this.size) stream.setWindow(this.size.rows.toString(), this.size.cols.toString(), this.size.height.toString(), this.size.width.toString())
 
 						// Define la codificación a UTF-8.
 						stream.setEncoding('utf-8')
-						
-						// Si se produce un error, rechaza la promesa.
-						if (err) reject(err);
-						// Si no, la resuelve.
-						else resolve(stream);
+
+						// Resuelve la promesa
+						resolve(stream);
 	
 						// Define la propiedad con el objeto de flujo de datos.
 						this.channel = stream;
@@ -134,11 +135,11 @@ export class SshClient {
 	 */
 	public resize(params: sizeParams) {
 
-		if (!this.channel) return;
-		
 		const { cols, rows, height, width } = params;
 
 		this.size = params;
+
+		if (!this.channel) return;
 
 		if (cols && rows && height && width) this.channel.setWindow(rows, cols, height, width)
 

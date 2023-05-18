@@ -149,8 +149,6 @@ export class TerminalService implements OnDestroy {
 		// Asigna el contenedor.
 		partialTerm.element = element;
 
-		setTimeout(() => {
-
 		// Prepara los parámetros de dimensiones.
 		const size = {
 			cols: terminal.cols.toString(),
@@ -163,9 +161,6 @@ export class TerminalService implements OnDestroy {
 		this._lastSizeParams = size;
 
 		this.socket.emit('newTerminal', { pid, size } as openConnection)
-
-		}, 1000)
-
 
 	}
 
@@ -260,23 +255,18 @@ export class TerminalService implements OnDestroy {
 
 			term.terminal?.fitAddon.fit();
 
-			setTimeout(() => {
+			const { cols, rows, element } = term.terminal!;
+			const { clientWidth: width, clientHeight: height } = element!;
+			const size = { cols: cols.toString(), rows: rows.toString(), width: width.toString(), height: height.toString() };
 
-				term.terminal?.fitAddon.fit();
-				const { cols, rows, element } = term.terminal!;
-				const { clientWidth: width, clientHeight: height } = element!;
-				const size = { cols: cols.toString(), rows: rows.toString(), width: width.toString(), height: height.toString() };
+			this._lastSizeParams = size;
 
-				this._lastSizeParams = size;
-
-				this.socket.emit('resize', {
-					auth: term.connection.auth,
-					host: term.connection.host,
-					pid: term.connection.pid,
-					size: this.lastSizeParams
-				} as resizeEvent);
-
-			}, 200)
+			this.socket.emit('resize', {
+				auth: term.connection.auth,
+				host: term.connection.host,
+				pid: term.connection.pid,
+				size: this.lastSizeParams
+			} as resizeEvent);
 
 		}
 

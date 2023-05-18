@@ -27,7 +27,7 @@ export class Terminal extends xterm {
 			  green: '#05bc79',
 			  yellow: '#e5e512',
 			  blue: '#2472c8',
-			  magenta: '#bc3fbc',
+			  magenta: '#824fd7',
 			  cyan: '#0fa8cd',
 			  white: '#e5e5e5',
 			  brightBlack: '#666666',

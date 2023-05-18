@@ -39,6 +39,10 @@ body {
 	/* transition: ease 0.2s all; */
 }
 
+.consoleIcon, .killBtn {
+	font-size: 11pt
+}
+
 .tab.focus {
 	/* background: var(--color-checks-gate-bg); */
 	/* background: var(--color-canvas-default) !important; */

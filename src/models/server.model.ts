@@ -1,4 +1,5 @@
 import { Server as HTTPServer } from 'http';
+import { Server as SecureHTTPServer } from 'https';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
@@ -11,10 +12,13 @@ import sharedsession from 'express-socket.io-session';
 import { ServerRouter } from '../routes/server.routes';
 import { AuthRouter } from '../routes/auth.routes';
 import { PlatformRouter } from '../routes/platform.routes';
+import { StaticRouter } from '../routes/static.routes';
+
 import { ClientSocket } from '../events/socket.events';
 import { memoryStore } from '../database/stores/memory.store';
 import { sessionInterceptor } from '../middlewares/session.middleware';
 import { socketStore } from '../database/stores/socket.store';
+import { TLS } from '../helpers/tsl.helper';
 
 export class Server {
 	
@@ -35,9 +39,25 @@ export class Server {
 
 
 	constructor(private port = 3000) {
+		
+		this.start();
 
-		// Instancia un servidor web básico.
-		this.server = new HTTPServer(this.api);
+	}
+
+	private async start() {
+
+		try {
+			const cert = await TLS.createSelfSignedCert();
+			
+			// Instancia un servidor web seguro.
+			this.server = new SecureHTTPServer({ key: cert.serviceKey, cert: cert.certificate }, this.api)
+
+		} catch (error) {
+
+			// Instancia un servidor web básico.
+			this.server = new HTTPServer(this.api);
+
+		}
 
 		// Instancia un servidor WebSockets.
 		this.sockets = new SocketIOServer(this.server, {
@@ -59,18 +79,19 @@ export class Server {
 		this.api.use(new AuthRouter().router);
 		this.api.use(new ServerRouter().router);
 		this.api.use(new PlatformRouter().router);
+		this.api.use(new StaticRouter().router);
 
 		// Asegura un número de puerto válido.
-		if (typeof port !== 'number' || port > 65535) port = 3000;
+		if (typeof this.port !== 'number' || this.port > 65535) this.port = 3000;
 
 		// Asigna al almacén de sockets los almacenes internos de sockets y salas.
 		socketStore.assignInternalSocketStore(this.sockets);
 
 		// Inicia el servidor.
-		this.server.listen(port, () => {
-			console.log(`${new Date().toISOString()} – ✓ Servidor en marcha http://localhost:${port}`);
+		this.server.listen(this.port, () => {
+			console.log(`${new Date().toISOString()} – ✓ Servidor en marcha http://localhost:${this.port}`);
 		})
-		
+
 	}
 
 	/** Genera y devuelve un almacén de sesiones. */
@@ -110,7 +131,6 @@ export class Server {
 	/** Maneja el evento de conexión de un nuevo cliente al servidor WebSockets. */
 	private handleConnect(socket: Socket) {
 
-		//new ClientThroughSsh(socket);
 		new ClientSocket(socket)
 		
 	}

@@ -3,7 +3,7 @@ import { hash } from 'bcryptjs';
 import { AppDataSource } from './data-source';
 import { AbstractDataManagerById } from './database_abstraction';
 import { User } from './entity/User';
-import { cypherAvailable, encrypt } from '../helpers/cypher.helper';
+import { cipherAvailable, encrypt } from '../helpers/cypher.helper';
 
 export interface user {
 	_id?: 			string,
@@ -22,7 +22,7 @@ class UserDatabase extends AbstractDataManagerById<User> {
 
 	constructor() {
 		console.log(`${new Date().toISOString()} – ✓ Cargando administrador de usuarios...`);
-		super(User);
+		super(User, ['password']);
 	}
 
 	public async createUser(user: newUser) {
@@ -36,7 +36,7 @@ class UserDatabase extends AbstractDataManagerById<User> {
 			let pass = await hash(user.password, 10);
 
 			// Cifra la contraseña si el servicio está disponible.
-			if (await cypherAvailable()) {
+			if (await cipherAvailable()) {
 
 				// Cifra la contraseña.
 				const cyphed = await encrypt(pass);

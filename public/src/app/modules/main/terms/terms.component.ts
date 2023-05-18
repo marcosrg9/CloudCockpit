@@ -94,6 +94,10 @@ import { TerminalService } from 'src/app/services/terminal.service';
 
 	}
 
+	public manualResize() {
+		this.terms.resize
+	}
+
 	ngOnDestroy(): void {
 		this.terms.removeWriteEvents();
 	}

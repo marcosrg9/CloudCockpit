@@ -8,9 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class SettingsComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute) {
-    route.params.subscribe(console.log)
-  }
+  constructor(private route: ActivatedRoute) { }
 
   ngOnInit(): void {
   }

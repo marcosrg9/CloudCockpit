@@ -2,6 +2,7 @@ import { stores } from 'src/app/data/store.data';
 import { terminalStore } from 'src/app/data/terminal.store';
 import { serverStore } from 'src/app/data/servers.data';
 import { primaryCommand } from 'src/app/interfaces/filter.interface';
+import { statusAndParams } from 'src/app/data/statuses.data';
 
 export const developerActions: primaryCommand[] = [
 	/* {
@@ -40,7 +41,10 @@ export const developerActions: primaryCommand[] = [
 	{
 		title: '[Signal] Emit arbitrary socket message',
 		description: 'Emit a message from any channel to the server.',
-		action: () => {}
+		action: () => {
+			statusAndParams.modalVisibility.arbitrarySocketEvents = true;
+			statusAndParams.commandPaletteVisibility = false;
+		}
 	},
 	{
 		title: '[Rest]{POST} Send arbitrary request (custom)',

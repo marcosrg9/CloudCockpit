@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { serverStore } from '../data/servers.data';
+import { AuthStore } from '../data/auth.data';
 import { server } from '../interfaces/server.interface';
 import { WebsocketsService } from './websockets.service';
 
@@ -10,12 +11,16 @@ import { WebsocketsService } from './websockets.service';
 export class ServersService {
 
   public store = serverStore;
+
+  public authStore: AuthStore;
   private _fetchedServers = false;
 
   //public servers: server[] | null;
 
   constructor(private socket: WebsocketsService) {
 
+    this.authStore = new AuthStore(this.socket);
+    
     this.listenGlobalEvents();
     this.fetchAllServers()
 

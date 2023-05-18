@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
 import { TerminalService } from 'src/app/services/terminal.service';
@@ -25,6 +25,8 @@ export class ServerComponent implements OnInit, OnDestroy {
   /** Referencia del objeto location. */
   public location = location;
 
+  private $routerEvents: Subscription;
+
   /** Parámetros de estado. */
   public status = {
     showSelector: false,
@@ -41,35 +43,78 @@ export class ServerComponent implements OnInit, OnDestroy {
               private router: Router,
               public servers: ServersService,
               private terms: TerminalService,
-              private sockets: WebsocketsService) { }
+              private sockets: WebsocketsService) {
+
+    this.$routerEvents = this.router.events.subscribe(e => {
+
+      if (e instanceof NavigationEnd) {
+        this.route.params.subscribe(data => {
+    
+          // Obtiene el último parámetro de la ruta.
+          const param = data['server'];
+    
+          // Si no se encuentra el identificador del servidor, se vuelve al menú principal.
+          if (!param) {
+            this.router.navigate(['main'])
+          }
+    
+          // Si no existe el array de servidores, significa que se acaba de cargar.
+          if (!this.servers.servers || this.servers.servers.length < 1) {
+    
+            // Escucha el evento de recepción de datos.
+            this.sockets.once('serverData', (e:any) => {
+              
+              // Retrasa un milisegundo la comprobación (error, array de servidores indefinido).
+              setTimeout(() => { this.findServerData(param) }, 1)
+    
+            })
+    
+            // Solicita la lista de servidores.
+            this.servers.fetchAllServers();
+    
+          // Si ya existían los servidores, se filtra.
+          } else this.findServerData(param)
+    
+        })
+      }
+      
+    })
+  }
 
   ngOnInit(): void {
-    this.route.params.subscribe(data => {
 
-      // Obtiene el último parámetro de la ruta.
-      const param = data['server'];
+    /* this.router.events.subscribe(e => {
 
-      // Si no se encuentra el identificador del servidor, se vuelve al menú principal.
-      if (!param) this.router.navigate(['main'])
-
-      // Si no existe el array de servidores, significa que se acaba de cargar.
-      if (!this.servers.servers) {
-
-        // Escucha el evento de recepción de datos.
-        this.sockets.once('serverData', () => {
-          
-          // Retrasa un milisegundo la comprobación (error, array de servidores indefinido).
-          setTimeout(() => { this.findServerData(param) }, 1)
-
+      if (e instanceof NavigationEnd) {
+        this.route.params.subscribe(data => {
+    
+          // Obtiene el último parámetro de la ruta.
+          const param = data['server'];
+    
+          // Si no se encuentra el identificador del servidor, se vuelve al menú principal.
+          if (!param) this.router.navigate(['main'])
+    
+          // Si no existe el array de servidores, significa que se acaba de cargar.
+          if (!this.servers.servers) {
+    
+            // Escucha el evento de recepción de datos.
+            this.sockets.once('serverData', () => {
+              
+              // Retrasa un milisegundo la comprobación (error, array de servidores indefinido).
+              setTimeout(() => { this.findServerData(param) }, 1)
+    
+            })
+    
+            // Solicita la lista de servidores.
+            this.servers.fetchAllServers();
+    
+          // Si ya existían los servidores, se filtra.
+          } else this.findServerData(param)
+    
         })
-
-        // Solicita la lista de servidores.
-        this.servers.fetchAllServers();
-
-      // Si ya existían los servidores, se filtra.
-      } else this.findServerData(param)
-
-    })
+      }
+      
+    }) */
   }
 
   /**
@@ -139,10 +184,10 @@ export class ServerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.$reflectedStoreObserver) {
-      // Cierra la subscripción para liberar memoria.
-      this.$reflectedStoreObserver.unsubscribe();
-    }
+    // Cierra las subscripciones para liberar memoria.
+    if (this.$reflectedStoreObserver) this.$reflectedStoreObserver.unsubscribe();
+    if (this.$routerEvents) this.$routerEvents.unsubscribe();
+
   }
 
 }

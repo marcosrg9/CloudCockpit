@@ -8,3 +8,14 @@
 .focus > svg > path {
 	color: var(--color-ansi-blue);
 }
+
+.tabnav-tab {
+	font-weight: 500;
+}
+
+.tabnav-tab.focus > .icon {
+	color: var(--personal-blue1);
+}
+.tabnav-tab > svg {
+	display: none;
+}

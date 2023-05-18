@@ -4,6 +4,7 @@ import { AppDataSource } from './data-source';
 import { AbstractDataManagerById } from './database_abstraction';
 import { Server } from './entity/Server';
 import { userStore } from './stores/user.store';
+import { auths } from './auth.db';
 
 export interface server {
 	/** Identificador del servidor. */
@@ -136,6 +137,66 @@ class ServersManager extends AbstractDataManagerById<Server> {
 		} catch (error) {
 			return Promise.reject('Invalid user id.')
 		}
+
+	}
+
+	/**
+	 * Busca un servidor por una credencial dada.
+	 * @param id Identificador de la credencial.
+	 */
+	public async findServerWithAuth(id: string) {
+
+		try {
+
+			const aid = new ObjectId(id);
+
+			return AppDataSource.manager.findOneByOrFail(Server, { auths: aid });
+
+		} catch (err) {
+			return Promise.reject('Invalid auth ide')
+		}
+
+	}
+
+	public async deleteAuthFromServer(id: string) {
+
+		try {
+
+			const server = await this.findServerWithAuth(id);
+			
+			const index = server.auths.findIndex((i => i.toString() === id));
+			
+			// TODO: Hacer un rollback aquí en caso de fallo.
+			if (index < 0) return Promise.reject("Auth index not found");
+
+			server.auths.splice(index, 1);
+
+			this.updateRecord(server._id, server);
+
+			Promise.resolve(server._id);
+
+			
+		} catch (err) { return err }
+
+	}
+
+	/**
+	 * Resuelve las credenciales de un servidor.
+	 * @param id Identificador del servidor
+	 */
+	public resolveAuths(id: string) {
+
+		// Obtiene el registro de un servidor por el id.
+		return this.getRecordById(id)
+		// Mapea y devuelve un array de promesas
+		.then(server => Promise.allSettled(server.auths.map(a => auths.getRecordById(a))))
+
+	}
+
+	
+	public addAuth(id: string) {
+
+
 
 	}
 

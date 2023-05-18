@@ -1,3 +1,91 @@
 <div class="anim-fade-in">
-	<h1>Cuentas</h1>
+	<h1>Credenciales</h1>
+
+	<div class="d-flex">
+		<div class="selectedAuth" [class.visible]="focusedAuth">
+			<div class="abs-pos">
+				<div class="fix-pos">
+					<div class="d-flex flex-items-center flex-column" *ngIf="focusedAuth">
+						<div class="closeBtn pointer" (click)="quitFocus()">
+							<div></div>
+							<div></div>
+						</div>
+						<div class="authIcon anim-delay-600 anim-fade-in-scale" [class.delete]="deleteMessage">
+							<i class="icon anim-delay-100 anim-fade-in" *ngIf="!focusedAuth.new && !deleteMessage">account_circle</i>
+							<i class="icon anim-delay-100 anim-fade-in" *ngIf="focusedAuth.new && !deleteMessage">account_add</i>
+							<i class="icon delete anim-delay-100 anim-fade-in" *ngIf="deleteMessage">account_delete</i>
+						</div>
+						<!-- TODO: añadir la propiedad touched a la clase errored. -->
+						<form [formGroup]="authForm" (ngSubmit)="saveAuth()" class="anim-fade-in anim-delay-800 d-flex flex-column" style="width: 90%; opacity: 0;">
+							<div class="form-group" [class.hidden]="deleteMessage" [class.errored]="authForm.controls.username.status === 'INVALID' && authForm.controls.username.touched">
+								<div class="form-group-header">
+									<label for="example-text">Usuario</label>
+								</div>
+								<div class="form-group-body">
+									<input class="form-control" required type="text" formControlName="username" #username (input)="username.value" [value]="focusedAuth.username" />
+								</div>
+								<p class="note error" id="username-error">Debe establecer un usuario válido.</p>
+							</div>
+							<div class="form-group mt-0" [class.hidden]="deleteMessage" [class.errored]="authForm.controls.password.status === 'INVALID' && authForm.controls.password.touched">
+								<div class="form-group-header">
+									<label for="example-text">Contraseña</label>
+								</div>
+								<div class="form-group-body">
+									<input class="form-control" type="password" formControlName="password" #password (input)="password.value" value="" />
+								</div>
+								<p class="note error" id="pass-errror">Debe establecer una contraseña válida.</p>
+							</div>
+							<div class="form-group mt-0" [class.hidden]="deleteMessage">
+								<div class="form-group-header">
+									<label for="example-text">Descripción</label>
+								</div>
+								<div class="form-group-body">
+									<input class="form-control" type="text" formControlName="description" #description [value]="focusedAuth.description" />
+								</div>
+							</div>
+							<div class="form-group mt-0">
+								<div class="form-group-body">
+									<button class="btn btn-outline btn-block anim-fade-in" [class.hidden]="deleteMessage" type="submit" *ngIf="(username.value !== focusedAuth.username || password.value.length > 0 || description.value !== focusedAuth.description) && username.value.length > 0">Guardar</button>
+									<br>
+									<button class="btn btn-danger" *ngIf="!focusedAuth.new && !deleteMessage" (click)="deleteMessage = true">Eliminar</button>
+								</div>
+							</div>
+
+							<div class="deleteMessage anim-fade-in" *ngIf="deleteMessage">
+								<h4>¿Desea eliminar la cuenta {{ focusedAuth.username }}?</h4>
+								<p>Esta acción es irreversible y no podrá recuperarla.</p>
+								<div>
+									<button class="btn btn-danger mr-1" (click)="deleteMessage = true" (click)="confirmDeletion()">Confirmar</button>
+									<button class="btn btn-outline ml-1"(click)="deleteMessage = false">Retroceder</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="authList">
+			<div class="mb-3 d-flex flex-items-center">
+				<input #filterCr (input)="filter(filterCr.value)" class="form-control mr-1" type="text" placeholder="Buscar" style="width: 100%;">
+				<button class="btn btn-outline" (click)="addNewAuth()">Nueva</button>
+			</div>
+			<div class="Box anim-fade-in anim-delay-600" *ngIf="this.accounts && this.accounts.length > 0">
+					<div class="Box-row d-flex align-center flex-items-center account pointer" *ngFor="let a of filteredAccounts" [class.selected]="focusedAuth && focusedAuth._id == a._id" (click)="focusAuth(a._id)">
+						<div class="icon mr-3">
+							<i class="icon" style="font-size: 14pt">account_circle</i>
+						</div>
+						<div class="data">
+							<div class="user">{{ a.username }}</div>
+							<div *ngIf="a.description && a.description.length > 0" class="description">{{ a.description }}</div>
+					</div>
+				</div>
+			</div>
+			<div *ngIf="this.accounts && this.accounts.length < 1">
+				Aún no has configurado una cuenta de usuario para este servidor.
+			</div>
+			<div *ngIf="!this.accounts" class="anim-fade-in anim-delay-600">
+				Obteniendo credenciales del servidor...
+			</div>
+		</div>
+	</div>
 </div>

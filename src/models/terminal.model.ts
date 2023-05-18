@@ -47,7 +47,7 @@ export class Terminal {
 				public readonly authId: string,
 				public readonly username: string,
 				public readonly password: string,
-				public readonly sizeParams?: sizeParams) {
+				public sizeParams?: sizeParams) {
 
 		// Comprueba si los parámetros de dimesiones no han sido establecidos y asigna los predefinidos.
 		if (!sizeParams) sizeParams = { cols: '80', rows: '120', height: '300', width: '200' };
@@ -74,9 +74,9 @@ export class Terminal {
 	/**
 	 * Conecta con el servidor y abre un flujo de datos.
 	 */
-	public connect() {
+	public connect(): Promise<typeof this.pid> {
 
-		if (this._status == 'connected') return;
+		if (this._status == 'connected') return Promise.resolve(this.pid);
 
 		// Declara el estado.
 		this._status = 'connecting';
@@ -125,7 +125,10 @@ export class Terminal {
 	 * Cambia las dimensiones de la terminal.
 	 * @param data Parámetros de dimensiones.
 	 */
-	public resize(data: sizeParams) { this.connection.resize(data) };
+	public resize(data: sizeParams) {
+		this.connection.resize(data);
+		this.sizeParams = data;
+	};
 
 	/**
 	 * Escucha los eventos provenientes del flujo de datos.

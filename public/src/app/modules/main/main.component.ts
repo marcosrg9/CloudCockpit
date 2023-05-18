@@ -3,6 +3,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { TerminalService } from 'src/app/services/terminal.service';
 import { ServersService } from 'src/app/services/servers.service';
 import { WebsocketsService } from 'src/app/services/websockets.service';
+import { statusAndParams } from 'src/app/data/statuses.data';
+import { AuthStore } from 'src/app/data/auth.data';
 
 @Component({
   selector: 'app-main',
@@ -15,11 +17,7 @@ export class MainComponent implements AfterViewInit {
 
   public darkmode: boolean;
 
-  public status = {
-    sync: false,
-    commandPalette: false,
-    navbarHdr: false
-  }
+  public status = statusAndParams;
 
   constructor(public terms: TerminalService,
               public auth: AuthService,
@@ -29,6 +27,9 @@ export class MainComponent implements AfterViewInit {
     // Se conecta al servidor (si aún no lo había hecho).
     sockets.connect();
 
+    // Inicializa el almacén de crendeciales.
+    new AuthStore(this.sockets);
+
     // Descubre todas las terminales almacenadas en el servidor.
     this.terms.discover();
 
@@ -36,6 +37,7 @@ export class MainComponent implements AfterViewInit {
     .addEventListener('change', (e) => {
       this.darkmode = e.matches;
     })
+
   }
 
   public getSessions() {
@@ -66,18 +68,22 @@ export class MainComponent implements AfterViewInit {
   }
 
   public toggleNavbarHdr() {
-    this.status.navbarHdr = !this.status.navbarHdr;
+    this.status.globalVisibility.userMenu = !this.status.globalVisibility.userMenu;
   }
 
   public toggleCmdPalette() {
     // Simula un nextTick. El cmdp detecta el evento click fuera de él y se cierra.
     setTimeout(() => {
-      this.status.navbarHdr = false;
-      console.log(this.status.commandPalette);
+      this.status.globalVisibility.userMenu = false;
+      console.log(this.status.commandPaletteVisibility);
       
-      this.status.commandPalette = !this.status.commandPalette;
+      this.status.commandPaletteVisibility = !this.status.commandPaletteVisibility;
     }, 0)
     
+  }
+
+  public emit(channel: string, message: string) {
+    this.sockets.emit(channel, message);
   }
 
   ngAfterViewInit() { }

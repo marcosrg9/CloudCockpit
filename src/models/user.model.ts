@@ -50,7 +50,6 @@ export class User {
 	 * @param channel Canal de datos.
 	 * @param message Mensaje.
 	 */
-	// BUG: Identificadores de datos repetidos en el almacén. Salida duplicada en el cliente.
 	public broadcast(channel: broadcastChannel, ...message: any) {
 
 		// Recorre todas las sesiones.

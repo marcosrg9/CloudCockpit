@@ -21,7 +21,16 @@ export class AuthComponent implements OnInit {
     .then((a) => {
       this.router.navigate(['/main']);
     })
-    .catch(() => { })
+    .catch(() => {
+
+      this.http.get('/server/initialized', { responseType: 'text' })
+      .subscribe({
+        error: () => {
+          this.router.navigate(['/setupWizard'])
+        }
+      })
+
+    })
   }
 
   public login(user: string, password: string) {

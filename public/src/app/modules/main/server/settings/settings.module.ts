@@ -8,6 +8,7 @@ import { ServerRouterModule } from '../server.routes';
 import { RouterModule } from '@angular/router';
 import { SettingsRouterModule } from './settings.routes';
 import { SettingsComponent } from './settings.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,8 @@ import { SettingsComponent } from './settings.component';
     SettingsRouterModule,
     RouterModule,
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class SettingsModule { }

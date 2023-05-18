@@ -1,7 +1,14 @@
+import { writeFile } from 'fs/promises';
+
 class Logger {
 
 	/** Indica si todos los logs deben insertarse en el mismo lugar o por separado. */
 	private unified: boolean = false;
+
+	protected currentWriter: Promise<void> | undefined;
+
+	/** Indica si el proceso corre en entorno de desarrollo.  */
+	private readonly devEnv = process.env.NODE_ENV ? true : false;
 
 	/**
 	 * 
@@ -20,7 +27,9 @@ class Logger {
 	 * @param id Identificador para mejorar el filtrado.
 	 */
 	public warning(tag: string, message: string, id?: string) {
-		console.error({tag, message, stack: new Error().stack})
+		//const { stack } = new Error()
+		//if (this. devEnv) console.error({ tag, message, stack })
+		//console.log(stack)
 	}
 
 	/**
@@ -30,8 +39,15 @@ class Logger {
 	 * @param id Identificador para mejorar el filtrado.
 	 */
 	public error(tag: string, message: string, id?: string) {
+		console.error(message)
+		//const { stack } = new Error()
+		//if (this.devEnv) console.error({ tag, message, stack })
+		//console.log(stack)
 
-		console.error({tag, message, stack: new Error().stack})
+		//this.currentWriter = writeFile('das', 'dsa', { encoding: 'utf-8'})
+		//this.currentWriter
+		//	.finally(() => this.currentWriter = undefined )
+		
 	}
 
 	/**
@@ -46,4 +62,4 @@ class Logger {
 
 }
 
-export const logger = new Logger();
+export const logger = new Logger()

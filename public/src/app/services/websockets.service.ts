@@ -1,5 +1,6 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { Socket, SocketIoConfig } from 'ngx-socket-io';
+import { statusAndParams } from '../data/statuses.data';
 import { stores } from '../data/store.data';
 import { ServersService } from './servers.service';
 
@@ -8,13 +9,13 @@ import { ServersService } from './servers.service';
 })
 export class WebsocketsService {
 
-  public socket: Socket = new Socket({ url: location.host, options: { autoConnect: false }});
+  private socket: Socket = new Socket({ url: location.host, options: { autoConnect: false }});
 
-  private pending: { event: string, args: any }[] = [];
+  private pendingPool: { event: string, args: any }[] = [];
 
   private connecting = false;
 
-  public readonly connected = '';
+  public connected = false;
 
   constructor() {
 
@@ -28,18 +29,26 @@ export class WebsocketsService {
     
     this.socket.once('readyToListen', this.onReadyToListen.bind(this));
 
+    statusAndParams.webSocket = {
+      connected: this.connected,
+      connecting: this.connecting
+    }
+
   }
 
-  public emit(event: string, ...args: any[] ) {
+  public emit(event: string, ...args: any[] ): void {
+    if (!this.connected) return this.emitWhenReady(event, ...args);
     this.socket.emit(event, ...args);
   }
 
   /**
    * Emite únicamente cuando el servidor indique que ha cargado los eventos.
    */
-  public emitWhenReady(event: string, ...args: any[]) {
-
-    this.pending.push({ event, args });
+  public emitWhenReady(event: string, ...args: any[]): void {
+    if (this.connected) {
+      return this.emit(event, ...args)
+    }
+    this.pendingPool.push({ event, args });
 
   }
 
@@ -68,24 +77,37 @@ export class WebsocketsService {
 
     if (this.connecting) return;
     if (!this.connected) {
+      statusAndParams.webSocket.connecting = true
       this.connecting = true;
       this.socket.connect();
 
       // Escucha el evento de conexión.
       this.socket.once('connect', () => {
         this.connecting = false;
+        this.connected = true;
+        statusAndParams.webSocket = {
+          connected: this.connected,
+          connecting: this.connecting
+        }
         this.socket.removeAllListeners('connect_error');
       })
       
       // Escucha el evento de error de conexión
       this.socket.once('connect_error', () => {
         this.connecting = false;
+        this.connected = false;
+        statusAndParams.webSocket.connecting = this.connecting;
+        statusAndParams.webSocket.connected = this.connected;
+        
         ['connect', 'disconnect'].forEach((e) => this.socket.removeAllListeners(e));
       })
       
       // Escucha el evento de desconexión.
       this.socket.once('disconnect', (reason: string) => {
         this.connecting = false;
+        this.connected = false;
+        statusAndParams.webSocket.connecting = this.connecting;
+        statusAndParams.webSocket.connected = this.connected;
         ['connect', 'connect_error'].forEach((e) => this.socket.removeAllListeners(e));
       })
     }
@@ -107,7 +129,7 @@ export class WebsocketsService {
   
   private onReadyToListen() {
 
-    this.pending.forEach(event => this.emit(event.event, ...event.args) )
+    this.pendingPool.forEach(event => this.emit(event.event, ...event.args) )
 
   }
 

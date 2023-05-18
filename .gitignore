@@ -8,3 +8,4 @@ tmp/
 temp/
 .env
 public/.angular/cache
+src/static

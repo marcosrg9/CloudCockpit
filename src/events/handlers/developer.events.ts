@@ -34,7 +34,8 @@ export class DeveloperEvents extends AbstractSocket {
 		// Volcado 1 - Almacenes.
 		else if (level === 1) {
 
-			console.log(userStore.get(this.socket.handshake.session.id).termStore);
+			console.log('%cVolcando almacén de usuarios', '{background: red; color: white}');
+			console.log(Array.from(userStore['store']).map((([k,v]) => v)));
 
 		}
 

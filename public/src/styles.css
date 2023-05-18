@@ -25,12 +25,44 @@ body {
 	font-family: 'UIKit Icons';
 }
 
+i.icon {
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+}
+
+.cc-icon {
+	background-image: url('assets/cc-icon.svg');
+	max-width: 32px;
+	max-height: 32px;
+	width: 32px;
+	height: 32px;
+	user-select: none;
+}
+
 /* Esto puede producir algunos errores de scroll... */
 .xterm-viewport {
 	scroll-behavior: smooth;
 }
 
+.tabnav-tab > .icon {
+	margin-right: 5px;
+}
+
 .anim-fade-in {
+	opacity: 0;
+	will-change: opacity;
+	animation-name: anim-fade-in;
+	animation-fill-mode: forwards;
+	animation-timing-function: linear;
+	animation-duration: 0.4s !important;
+}
+
+.anim-fade-in-scale {
+	transform: scale(0%);
+	will-change: transform;
+	animation-name: anim-fade-in-scale;
+	animation-fill-mode: forwards;
+	animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 	animation-duration: 0.4s !important;
 }
 
@@ -47,12 +79,33 @@ ng-terminal > * > .resize-handle {
 	cursor: pointer;
 }
 
+@keyframes anim-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes anim-fade-in-scale {
+	from {
+		transform: scale(0%);
+	}
+	to {
+		transform: scale(100%);
+	}
+}
+
 @media (prefers-color-scheme: dark) {
 	:root {
 		--foreground: white;
 		--foreground_RGB: 255,255,255;
 		--background: black;
 		--background_RGB: 0,0,0;
+	}
+	.cc-icon {
+		filter: invert(1);
 	}
 }
 

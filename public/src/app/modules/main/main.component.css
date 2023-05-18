@@ -7,6 +7,23 @@
 	cursor: pointer;
 }
 
+.dropdown-item > .octicon {
+	display: none;
+}
+.dropdown-item > i.icon {
+	color: var(--personal-blue1);
+	width: 15px;
+	display: inline-block;
+	text-align: center;
+	user-select: none;
+}
+
+.dropdown-item:hover,
+.dropdown-item:hover > i.icon {
+	color: white;
+}
+
+
 .notifs {
 	position: absolute;
 	right: 0;
@@ -40,6 +57,25 @@
 	animation-fill-mode: forwards;
 	animation-duration: 0.17s;
 
+}
+
+.arbitraryEvent {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 400px;
+}
+
+#websocket-warn {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 100%;
+	background-color: #ff0031;
+	padding: 10px 360px;
+	z-index: 999;
+	display: none;
 }
 
 @keyframes paletteVisible {

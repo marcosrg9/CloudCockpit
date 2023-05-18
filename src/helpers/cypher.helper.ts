@@ -30,7 +30,7 @@ const generateIV = () => {
 /**
  * Indica si el cifrado está disponible.
  */
-export const cypherAvailable = () => {
+export const cipherAvailable = () => {
 	
 	return getCipherKey()
 	.then(() => true)
@@ -55,7 +55,7 @@ const splitIV = (data: string) => {
 }
 
 /**
- * Cidra una cadena dada con el algoritmo aes 256 cbc.
+ * Cifra una cadena dada con el algoritmo aes 256 cbc.
  * @param data Datos a cifrar.
  */
 export const encrypt = async(data: string) => {

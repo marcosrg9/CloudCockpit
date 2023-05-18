@@ -50,7 +50,7 @@ export class GlobalEvents extends AbstractSocket {
 	/**
 	 * Obtiene una lista de servidores.
 	 */
-	// TODO: Basura por todos lados. Y si cambiamos de mongo a SQLite??
+	// TODO: Pasar este método al controlador de eventos de servidores.
 	private onGetServers() {
 
 		servers.getServersOfUser(this.session.auth._id)
@@ -252,9 +252,14 @@ export class GlobalEvents extends AbstractSocket {
 			})
 
 		})
+		.catch(err => {
+			console.error(err)
+		})
 
 
 	}
+
+	public removeAllListeners() {}
 
 	/**
 	 * Maneja el evento de desconexión del socket.
@@ -265,7 +270,7 @@ export class GlobalEvents extends AbstractSocket {
 		socketStore.destroy(this.socket.id);
 		
 		// Elimina todos los oyentes de eventos.
-		this.removeAllListeners();
+		//this.removeAllListeners();
 
 		// Bussca la sesión.
 		const session = sessionStore.getRecord(this.session.id);

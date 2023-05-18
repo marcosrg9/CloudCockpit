@@ -24,7 +24,6 @@ class TerminalStore {
 
 	constructor() {
 		this.$observableStore.next([]);
-		console.log(this.$observableStore)
 	}
 
 	/**

@@ -11,20 +11,30 @@ import { env } from 'process';
 import { logger } from './src/models/logger.model';
 import { isDocker } from './src/helpers/isDocker.helper';
 import { PlatformHelper } from './src/helpers/platform.helper';
-import { freemem, totalmem } from 'os';
 
-PlatformHelper.parseLastMagnitude(freemem());
-PlatformHelper.parseLastMagnitude(totalmem());
 class Main {
+
+	public readonly nodeMinVersion = PlatformHelper.getNodeMinVersion();
+
+	public readonly nodeVersion = process.versions.node;
 
 	public server: Server;
 
 	/** Indica si la instancia corre sobre docker */
 	public readonly runningOverDocker = isDocker();
 
+	/** Indica si el proceso corre en un entorno de desarrollo. */
+	public readonly devEnv = process.env.NODE_ENV ? true : false;
+
 	constructor() {
 
-		console.log(`CloudCockpit ${ pkg.version }`)
+		if (this.nodeVersion < this.nodeMinVersion) {
+			const msg = `The platform is using an older version of node than required.\nVersion ${this.nodeMinVersion} was required and ${this.nodeVersion} is being used.`
+			this.kill(msg, true);
+		}
+
+		console.log('%c CloudCockpit\t\t\t\t', 'background-color: #0056FF; color: white');
+		console.log(`%c Server with UI bundle v${ pkg.version }\t\t`, 'background-color: black; color: white');
 
 		if (env.NODE_ENV === 'dev') console.log('%c Running on dev environment', 'background-color: orange; color: white')
 
@@ -60,21 +70,36 @@ class Main {
 		})
 
 	}
+
+	public kill(message: string, withError: boolean = false) {
+		
+		if (message && withError) {
+			logger.error('kill', message)
+			console.error(message);
+		}
+
+		withError ? process.exit(1) : process.exit();
+	}
 }
 
-/** Escucha los eventos de excepciones no controladas. */
-process.on('uncaughtException', (err, origin) => {
+if (process.env.NODE_ENV !== 'dev') {
 
-	console.error(err.stack)
-	console.error('exception')
-	logger.error('platform', err.stack, 'node.event.uncaughtException')
+	/** Escucha los eventos de excepciones no controladas. */
+	process.on('uncaughtException', (err, origin) => {
+	
+		console.error(err.stack)
+		console.error('exception')
+		logger.error('platform', err.stack, 'node.event.uncaughtException')
+	
+	}).on('unhandledRejection', (reason, promise) => {
+	
+		console.error('Rejection')
+		logger.error('platform', reason as string, 'node.event.unhandledRejection');
+	
+	})
+	
+}
 
-}).on('unhandledRejection', (reason, promise) => {
-
-	console.error('Rejection')
-	logger.error('platform', reason as string, 'node.event.unhandledRejection');
-
-})
 
 /** Instancia principal de la plataforma CloudCockpit. */
 export const main = new Main();

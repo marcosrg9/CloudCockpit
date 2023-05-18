@@ -8,7 +8,7 @@ export abstract class AbstractSocket {
 	 * @param eventChannels Lista de nombre de los canales de eventos.
 	 */
 	constructor(private _socket: Socket,
-				protected _eventChannels: string[]) { }
+				private _eventChannels: string[]) { }
 
 	public removeAllListeners() {
 		this._eventChannels.forEach(channel => {

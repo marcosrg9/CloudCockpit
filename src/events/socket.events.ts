@@ -6,6 +6,7 @@ import { AdminEvents } from './handlers/admin.events';
 import { DeveloperEvents } from './handlers/developer.events';
 import { GlobalEvents } from './handlers/global.events';
 import { TerminalEvents } from './handlers/terminal.events';
+import { ServerEvents } from './handlers/server.events';
 
 export class ClientSocket {
 
@@ -13,6 +14,7 @@ export class ClientSocket {
 	public id: string;
 
 	public global: GlobalEvents;
+	public servers: ServerEvents;
 	public terminal: TerminalEvents;
 	public admin: AdminEvents;
 	public developer: DeveloperEvents;
@@ -59,6 +61,8 @@ export class ClientSocket {
 
 		// Instancia los controladores de eventos.
 		this.global = new GlobalEvents(this.socket);
+
+		this.servers = new ServerEvents(this.socket);
 
 		// Instancia el controlador de eventos de terminal si existe alguna.
 		if (userStore.get(this.socket.handshake.session.auth._id).termStore.size > 0) {
