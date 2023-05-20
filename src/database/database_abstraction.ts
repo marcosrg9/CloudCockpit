@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import typeorm from 'typeorm';
 import { cipherAvailable, decrypt, encrypt } from '../helpers/cypher.helper';
 import { mergeDiffProperties } from '../helpers/object.helper';
 import { AppDataSource } from './data-source';
@@ -91,13 +92,40 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 	public getAllRecords(): Promise<T[]> { return AppDataSource.manager.find(this.entity) };
 
 	/**
+	 * Inserta un registro en la base de datos y en el almacén si la inserción es exitosa.
+	 * @param record Registro a insertar en la base de datos.
+	 */
+	public async insert(record: T): Promise<T> {
+
+		try {
+
+			const repo = AppDataSource.getMongoRepository(this.entity);
+	
+			const cyphed = await this.encrypt(record, true);
+
+			record.enc = cyphed.enc;
+	
+			return repo.save(cyphed)
+			.then((v: T) => {
+				record._id = v._id;
+				this.store.set(record._id.toString(), record)
+				return record;
+			})
+
+		} catch(err) {
+			return err
+		}
+		
+	}
+
+	/**
 	 * Actualiza una entrada del registro de la colección.\
 	 * Este método se encarga de fusionar los cambios.
 	 * @param id Identificador del recurso.
 	 * @param data Conjunto de datos para actualizar.
 	 */
 	public async updateRecord(id: string, data: any): Promise<T> {
-
+		// TODO: Esto no está eliminando bien las credenciales de los servidores.
 		try {
 			
 			// Obtiene la colección de la entidad.
@@ -108,9 +136,11 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 	
 			// Obtiene el registro.
 			const record = await repo.findOneByOrFail({ _id: identifier }) as T;
+
+			const decriptedOldRecord = await this.decrypt(record);
 	
 			// Obtiene el nuevo registro con los cambios y descifra las propiedades.
-			const newRecord = mergeDiffProperties(await this.decrypt(record), data, ['_id']) as T;
+			const newRecord = mergeDiffProperties(decriptedOldRecord, data, { ignored: ['_id'], ignoredInstances: [ObjectId], stringMinLength: 0 }) as T;
 			
 			// Guarda los cambios.
 			repo.save(await this.encrypt(newRecord));
@@ -122,7 +152,7 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 			decrypted._id = id;
 
 			// Establece el registro en el almacén.
-			this.store.set(id, decrypted);
+			this.store.set(id.toString(), decrypted);
 
 			return decrypted;
 		
@@ -143,6 +173,10 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 	public deleteRecord(id: string) {
 
 		return AppDataSource.manager.delete(this.entity, { _id: new ObjectId(id) })
+		.then((a) => {
+			this.store.delete(id);
+			return a;
+		})
 	}
 
 	/**
@@ -157,6 +191,7 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 	/**
 	 * Cifra los datos proporcionados.
 	 * @param data Datos a cifrar.
+	 * @param clone Crea una nueva referencia y previene la escritura sobre la original.
 	 */
 	protected async encrypt(data: T, clone = false): Promise<T> {
 
@@ -170,11 +205,13 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 			
 			if (clone) data = structuredClone(data);
 
-			const prom = await Promise.allSettled(this.cyphedKeys.map(k => encrypt(data[k]) ));
+			const prom = await Promise.all(this.cyphedKeys.map(k => encrypt(data[k]) ));
 
 			prom.forEach((v, i) => {
-				if (v.status === 'fulfilled') data[this.cyphedKeys[i]] = v.value.cyphed + v.value.iv;
+				data[this.cyphedKeys[i]] = v.cyphed + v.iv;
 			});
+
+			data.enc = true;
 
 			return data;
 
@@ -226,6 +263,5 @@ export abstract class AbstractDataManagerById<T extends EntityIdentifiedById> {
 		}
 
 	}
-
 
 }

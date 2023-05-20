@@ -30,22 +30,6 @@ class AuthDatabase extends AbstractDataManagerById<Auth> {
 
 		// Si se ha producido un error de validación, devuelve una promesa rechazada con el error.
 		if (validation.error) return Promise.reject(validation.error);
-		
-		try {
-
-			// Cifra los datos.
-			const cyphed = await Promise.all([encrypt(data.username), encrypt(data.password)])
-
-			// Asigna los datos.
-			validation.value.username = cyphed[0].cyphed + cyphed[0].iv;
-			validation.value.password = cyphed[1].cyphed + cyphed[1].iv;
-			validation.value.enc = true;
-			
-		// No hay claves para el cifrado, se procede con los datos validados sin cifrar.
-		} catch (err) {
-			// Asigna la marca de estado de cifrado a falso.
-			validation.value.enc = false;
-		}
 
 		// Genera una nueva credencial.
 		const credential = new Auth();
@@ -56,14 +40,15 @@ class AuthDatabase extends AbstractDataManagerById<Auth> {
 		try {
 			
 			// Crea el conjunto de promesas para crear la credencial y obtener el servidor asociado.
-			const [ server ] = await Promise.all([servers.getRecordById(id), AppDataSource.manager.insert(Auth, credential)]);
+			const [ server, auth ] = await Promise.all([servers.getRecordById(id), this.insert(credential)]);
 
 			// Inserta en el array de credenciales la credencial creada.
-			server.auths.push(new ObjectId(credential._id));
+			server.auths.push(auth._id);
 
-			await servers.updateRecord(server._id.toString(), server);
-			
-			return credential;
+			return servers.updateRecord(server._id.toString(), server)
+			.then(() => {
+				return auth;
+			})
 
 		} catch (err) {
 
@@ -95,7 +80,9 @@ class AuthDatabase extends AbstractDataManagerById<Auth> {
 	public deleteRecord(id: string): Promise<DeleteResult> {
 		
 		return super.deleteRecord(id)
-		.then(() => servers.deleteAuthFromServer(id));
+		.then(() => {
+			return servers.deleteAuthFromServer(id)
+		});
 
 	}
 
