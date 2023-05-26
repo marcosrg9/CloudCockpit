@@ -1,10 +1,9 @@
 {
    "name": "cloudcockpit",
-   "version": "0.2.1",
+   "version": "0.2.2",
    "description": "",
    "main": "main.ts",
    "dependencies": {
-      "@socket.io/admin-ui": "^0.5.1",
       "bcryptjs": "2.4.3",
       "cors": "2.8.5",
       "dotenv": "16.0.1",
@@ -22,8 +21,6 @@
       "wol": "1.0.7"
    },
    "devDependencies": {
-      "@airbnb/node-memwatch": "^2.0.0",
-      "@types/airbnb__node-memwatch": "^2.0.0",
       "@types/bcryptjs": "2.4.2",
       "@types/cors": "2.8.12",
       "@types/dotenv": "8.2.0",
@@ -44,6 +41,8 @@
    "scripts": {
       "start": "ts-node main.ts",
       "instAllDep": "npm i && cd public && npm i",
+      "buildAll": "cd public && npm run build && cd .. && tsc",
+      "build": "tsc",
       "public": "cd public && ng serve --host=0.0.0.0",
       "typeorm": "typeorm-ts-node-commonjs"
    },

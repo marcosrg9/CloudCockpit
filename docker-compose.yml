@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  cloudcockpit:
+    container_name: cloudcockpit
+    build: .
+    env_file: .env
+    environment:
+      - NODE_ENV=PRODUCTION
+      - DB_HOST=db
+      - DB_AUTH=admin
+      - DB_USER=cloudcockpit-database-user
+      - DB_PASS=cloudcockpit-database-password
+      - DB_NAME=cloudcockpit
+      - DB_PORT=27017
+    depends_on:
+      - db
+    volumes:
+      - cloudcockpit-data:/home/cloudcockpit/app/
+    ports:
+      - "3000:3000"
+    command: 
+      - build/main.js
+    networks:
+      - cc-db-network
+
+  db:
+    image: mongo:4.1.8-xenial
+    container_name: db
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=cloudcockpit
+      - MONGO_INITDB_ROOT_USERNAME=cloudcockpit-database-user
+      - MONGO_INITDB_ROOT_PASSWORD=cloudcockpit-database-password
+    volumes:     
+      - dbdata:/data/db
+    networks:
+      - cc-db-network
+
+networks:
+  cc-db-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+  cloudcockpit-data:

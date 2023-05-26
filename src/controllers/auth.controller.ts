@@ -3,8 +3,10 @@ import { TypeORMError } from 'typeorm';
 import { platform } from '../database/platform.db';
 import { sessionStore } from '../database/stores/session.store';
 import { user, users } from '../database/user.db';
+import { CypherError } from '../errors/cypher.error';
 import { comparePasswords } from '../helpers/bcrypt.helper';
 import { decrypt } from '../helpers/cypher.helper';
+import { logger } from '../models/logger.model';
 
 /*
 	Gestión de terminales.
@@ -71,6 +73,11 @@ export abstract class AuthController {
 				return res.status(500).send('Database driver error');
 				
 			} */
+
+			if (err instanceof CypherError) {
+				logger.error('login@AuthController', err.message, err)
+				return res.status(500).send('Login failed');
+			}
 
 			if (err instanceof TypeORMError) {
 

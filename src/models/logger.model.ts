@@ -36,18 +36,12 @@ class Logger {
 	 * 
 	 * @param tag Etiqueta para el log. Esta debe ser genérica para que pueda ser catalogda.
 	 * @param message Mensaje de error a insertar en el log.
-	 * @param id Identificador para mejorar el filtrado.
+	 * @param error Instancia del error o cualquier otro tipo de referencia del origen.
 	 */
-	public error(tag: string, message: string, id?: string) {
+	public error(tag: string, message: string, error?: any) {
+		console.error(tag)
 		console.error(message)
-		//const { stack } = new Error()
-		//if (this.devEnv) console.error({ tag, message, stack })
-		//console.log(stack)
-
-		//this.currentWriter = writeFile('das', 'dsa', { encoding: 'utf-8'})
-		//this.currentWriter
-		//	.finally(() => this.currentWriter = undefined )
-		
+		if (error) console.error(error)
 	}
 
 	/**
@@ -57,6 +51,10 @@ class Logger {
 	 * @param id Identificador para mejorar el filtrado.
 	 */
 	public generic(section: string, tag: string, message: string, id?: string) {
+
+	}
+
+	private getDate() {
 
 	}
 

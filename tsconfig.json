@@ -14,9 +14,14 @@
       "outDir": "./build",
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
-      "sourceMap": true,
+      "sourceMap": false,
       "esModuleInterop": true,
       "noImplicitReturns": false,
-      "resolveJsonModule": true
-   }
+      "resolveJsonModule": true,
+      "skipLibCheck": true
+   },
+   "exclude": [
+      "./public",
+      "./node_modules"
+   ]
 }

@@ -1,6 +1,5 @@
-# CloudCockpit 0.2.1
+# CloudCockpit 0.2.2
 
-- Fixed an error that was causing incorrect updates of some entities, resulting in duplicated records.
-- Fixed certain errors that were preventing proper synchronization of memory stores.
-- Added the insert method for database administrators.
-- Fixed improper setting of the encryption indicator.
+- The Dockerfile and docker-compose.yml files have been implemented.
+- A bug has been resolved that prevented logging in when the encryption key did not exist and there were encrypted records.
+- New icons have been added.

@@ -1,4 +1,5 @@
 import { randomBytes, createCipheriv, createDecipheriv, CipherCCMTypes } from 'crypto';
+import { CypherError } from '../errors/cypher.error';
 
 /**
  * Extrae la clave de cifrado de la variable de entorno.
@@ -9,10 +10,10 @@ import { randomBytes, createCipheriv, createDecipheriv, CipherCCMTypes } from 'c
 	const { DB_CYPH: key } = process.env;
 	
 	// Comprueba si la clave existe.
-	if (!key) return Promise.reject('Cypher key missing');
+	if (!key) return Promise.reject(new CypherError('MissingKey'));
 
 	// Comprueba si la clave no tiene la longitud adecuada.
-	if (key.length !== 32) return Promise.reject('Invalid cypher key');
+	if (key.length !== 32) return Promise.reject(new CypherError('InvalidKey'));
 
 	return Promise.resolve(key);
 
